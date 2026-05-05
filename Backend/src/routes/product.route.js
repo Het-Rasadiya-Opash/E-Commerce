@@ -8,11 +8,13 @@ import {
   getProducts,
   getProductsByUser,
   deleteProduct,
+  getAllCategories,
 } from "../controllers/product.controler.js";
 
 const router = express.Router();
 
 router.get("/", getProducts);
+router.get("/categories", getAllCategories);
 
 router.get("/user", authMiddleware, getProductsByUser);
 

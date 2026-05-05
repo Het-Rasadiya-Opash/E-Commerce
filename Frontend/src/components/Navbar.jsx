@@ -90,9 +90,6 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors hidden sm:block">
-              <Search className="w-5 h-5" />
-            </button>
             <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
               <ShoppingBag className="w-5 h-5" />
               <span className="absolute top-1 right-1 bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white">

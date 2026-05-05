@@ -27,15 +27,19 @@ const Home = () => {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
 
-  const categories = [
-    "Electronics",
-    "Fashion",
-    "Home",
-    "Beauty",
-    "Sports",
-    "Books",
-  ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await apiRequest.get("/products/categories");
+        setCategories(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     dispatch(setLoading(true));
@@ -249,11 +253,8 @@ const Home = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                 {products.map((product) => (
-                  <Link to={`/product/${product._id}`}>
-                    <div
-                      key={product._id}
-                      className="bg-white rounded-2xl p-4 border border-slate-100 hover:border-indigo-100 hover:shadow-lg transition-all"
-                    >
+                  <Link to={`/product/${product._id}`} key={product._id}>
+                    <div className="bg-white rounded-2xl p-4 border border-slate-100 hover:border-indigo-100 hover:shadow-lg transition-all">
                       <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-50 mb-6">
                         {product.images && product.images[0] ? (
                           <img

@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import AddProduct from "./pages/AddProduct";
 import ProductDetail from "./pages/ProductDetail";
+import Categories from "./components/Categories";
 
 const App = () => {
   const location = useLocation();
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
 
           <Route path="/product/:productId" element={<ProductDetail />} />
+          <Route path="/categories" element={<Categories />} />
 
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />

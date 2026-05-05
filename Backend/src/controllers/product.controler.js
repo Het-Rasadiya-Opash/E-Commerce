@@ -258,3 +258,16 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "Product deleted successfully"));
 });
+
+export const getAllCategories = asyncHandler(async (req, res) => {
+  const categories = await productModel.distinct("category");
+
+  if (!categories) {
+    throw new ApiError(404, "Categories not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, categories, "Categories fetched successfully"));
+});
+
