@@ -14,6 +14,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { logout } from "../features/usersSlice";
+import apiRequest from "../utils/apiRequest";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,17 +34,12 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await apiRequest.post("/users/logout");
+    toast.success("Logged out successfully");
     dispatch(logout());
     navigate("/login");
   };
-
-  const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Categories", path: "/categories" },
-    { name: "Deals", path: "/deals" },
-    { name: "New Arrivals", path: "/new-arrivals" },
-  ];
 
   return (
     <nav
@@ -58,21 +55,36 @@ const Navbar = () => {
             <div className="bg-indigo-600 p-2 rounded-xl">
               <ShoppingBag className="text-white w-6 h-6" />
             </div>
-            {/* <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+            <span className="hidden lg:inline text-2xl font-bold bg-indigo-600 0 bg-clip-text text-transparent">
               E-Commerce
-            </span> */}
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className="text-slate-600 hover:text-indigo-600 font-medium transition-colors"
-              >
-                {link.name}
-              </Link>
-            ))}
+            <Link
+              to="/"
+              className="text-slate-600 hover:text-indigo-600 font-medium transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              to="/categories"
+              className="text-slate-600 hover:text-indigo-600 font-medium transition-colors"
+            >
+              Categories
+            </Link>
+            <Link
+              to="/deals"
+              className="text-slate-600 hover:text-indigo-600 font-medium transition-colors"
+            >
+              Deals
+            </Link>
+            <Link
+              to="/new-arrivals"
+              className="text-slate-600 hover:text-indigo-600 font-medium transition-colors"
+            >
+              New Arrivals
+            </Link>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -180,20 +192,37 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 animate-in slide-in-from-top duration-300">
           <div className="px-4 pt-2 pb-6 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsMenuOpen(false)}
-                className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-              >
-                {link.name}
-              </Link>
-            ))}
+            <Link
+              to="/"
+              onClick={() => setIsMenuOpen(false)}
+              className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+            >
+              Home
+            </Link>
+            <Link
+              to="/categories"
+              onClick={() => setIsMenuOpen(false)}
+              className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+            >
+              Categories
+            </Link>
+            <Link
+              to="/deals"
+              onClick={() => setIsMenuOpen(false)}
+              className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+            >
+              Deals
+            </Link>
+            <Link
+              to="/new-arrivals"
+              onClick={() => setIsMenuOpen(false)}
+              className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+            >
+              New Arrivals
+            </Link>
             {!currentUser && (
               <div className="pt-4 grid grid-cols-2 gap-4">
                 <Link
