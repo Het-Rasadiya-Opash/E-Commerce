@@ -72,7 +72,7 @@ const Login = () => {
             <ShoppingBag className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-            E-Commerce
+            Login
           </h1>
         </div>
 
