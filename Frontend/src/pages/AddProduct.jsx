@@ -24,6 +24,7 @@ import {
   DollarSign,
   Briefcase,
   ChevronRight,
+  IndianRupee,
 } from "lucide-react";
 
 const AddProduct = () => {
@@ -259,11 +260,11 @@ const AddProduct = () => {
 
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-semibold text-slate-700 ml-1">
-                  Base Price ($)
+                  Base Price (₹)
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-slate-400" />
+                    <IndianRupee className="h-5 w-5 text-slate-400" />
                   </div>
                   <input
                     type="number"
@@ -448,7 +449,7 @@ const AddProduct = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
-                        Variant Price ($)
+                        Variant Price (₹)
                       </label>
                       <input
                         type="number"

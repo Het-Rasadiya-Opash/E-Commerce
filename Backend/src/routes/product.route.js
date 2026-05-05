@@ -7,6 +7,7 @@ import {
   getProductById,
   getProducts,
   getProductsByUser,
+  deleteProduct,
 } from "../controllers/product.controler.js";
 
 const router = express.Router();
@@ -16,6 +17,8 @@ router.get("/", getProducts);
 router.get("/user", authMiddleware, getProductsByUser);
 
 router.get("/:id", getProductById);
+
+router.delete("/:id", authMiddleware, authorizeRole("ADMIN"), deleteProduct);
 
 router.post(
   "/create",

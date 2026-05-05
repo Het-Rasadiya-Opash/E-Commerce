@@ -240,3 +240,22 @@ export const getProductsByUser = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, products, "Products fetched successfully"));
 });
+
+export const deleteProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const product = await productModel.findById(id);
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  if (product.createdBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to delete this product");
+  }
+
+  await productModel.findByIdAndDelete(id);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Product deleted successfully"));
+});
