@@ -4,6 +4,7 @@ import cors from "cors";
 import errorHandler from "./middlewares/error.middleware.js";
 export const app = express();
 import usersRouter from "./routes/users.route.js";
+import productRouter from "./routes/product.route.js";
 
 app.use(
   cors({
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use(express.static("public"));
 
 app.use("/api/users", usersRouter);
+app.use("/api/products", productRouter);
 
 //error handler
 app.use(errorHandler);

@@ -1,0 +1,17 @@
+import express from "express";
+import { authorizeRole } from "../middlewares/authRole.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
+import { createProduct } from "../controllers/product.controler.js";
+
+const router = express.Router();
+
+router.post(
+  "/create",
+  authMiddleware,
+  authorizeRole("ADMIN"),
+  upload.any(),
+  createProduct,
+);
+
+export default router;
