@@ -12,6 +12,7 @@ import { setCheckingAuth, setCurrentUser } from "./features/usersSlice";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import AddProduct from "./pages/AddProduct";
+import ProductDetail from "./pages/ProductDetail";
 
 const App = () => {
   const location = useLocation();
@@ -46,9 +47,11 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          <Route path="/product/:productId" element={<ProductDetail />} />
+
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/add-product" element={<AddProduct />} />  
+            <Route path="/add-product" element={<AddProduct />} />
           </Route>
         </Routes>
       </main>

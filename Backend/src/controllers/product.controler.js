@@ -16,7 +16,6 @@ export const createProduct = asyncHandler(async (req, res) => {
     tags,
   } = req.body;
 
-  // Transform req.files from array to object if it's an array (from upload.any())
   if (req.files && Array.isArray(req.files)) {
     const filesObject = {};
     req.files.forEach((file) => {

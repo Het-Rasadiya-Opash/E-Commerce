@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import apiRequest from "../utils/apiRequest";
 import { setProducts, setLoading, setError } from "../features/productSlice";
+import { Link } from "react-router";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -248,54 +249,56 @@ const Home = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                 {products.map((product) => (
-                  <div
-                    key={product._id}
-                    className="bg-white rounded-2xl p-4 border border-slate-100 hover:border-indigo-100 hover:shadow-lg transition-all"
-                  >
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-50 mb-6">
-                      {product.images && product.images[0] ? (
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300">
-                          <Package className="w-16 h-16" />
-                        </div>
-                      )}
+                  <Link to={`/product/${product._id}`}>
+                    <div
+                      key={product._id}
+                      className="bg-white rounded-2xl p-4 border border-slate-100 hover:border-indigo-100 hover:shadow-lg transition-all"
+                    >
+                      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-50 mb-6">
+                        {product.images && product.images[0] ? (
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-300">
+                            <Package className="w-16 h-16" />
+                          </div>
+                        )}
 
-                      <div className="absolute top-4 left-4">
-                        <span className="px-3 py-1.5 bg-white shadow-sm rounded-lg text-[10px] font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-                          <Tag className="w-3 h-3 text-indigo-600" />
-                          {product.category}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="px-2 pb-2">
-                      <h3 className="font-bold text-slate-900 text-lg hover:text-indigo-600 transition-colors line-clamp-1 mb-1">
-                        {product.name}
-                      </h3>
-                      <p className="text-slate-500 line-clamp-2 mb-6 h-10 leading-relaxed text-sm">
-                        {product.description}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-5 border-t border-slate-50">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                            Price
-                          </span>
-                          <span className="text-2xl font-bold text-slate-900">
-                            ₹{product.basePrice?.toLocaleString()}
+                        <div className="absolute top-4 left-4">
+                          <span className="px-3 py-1.5 bg-white shadow-sm rounded-lg text-[10px] font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+                            <Tag className="w-3 h-3 text-indigo-600" />
+                            {product.category}
                           </span>
                         </div>
-                        <button className="h-12 w-12 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors flex items-center justify-center group/btn">
-                          <ShoppingCart className="w-5 h-5" />
-                        </button>
+                      </div>
+
+                      <div className="px-2 pb-2">
+                        <h3 className="font-bold text-slate-900 text-lg hover:text-indigo-600 transition-colors line-clamp-1 mb-1">
+                          {product.name}
+                        </h3>
+                        <p className="text-slate-500 line-clamp-2 mb-6 h-10 leading-relaxed text-sm">
+                          {product.description}
+                        </p>
+
+                        <div className="flex items-center justify-between pt-5 border-t border-slate-50">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                              Price
+                            </span>
+                            <span className="text-2xl font-bold text-slate-900">
+                              ₹{product.basePrice?.toLocaleString()}
+                            </span>
+                          </div>
+                          <button className="h-12 w-12 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors flex items-center justify-center group/btn">
+                            <ShoppingCart className="w-5 h-5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
