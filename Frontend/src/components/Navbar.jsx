@@ -105,12 +105,12 @@ const Navbar = () => {
                   className="flex items-center space-x-2 p-1 pl-2 pr-3 hover:bg-slate-100 rounded-full transition-colors border border-slate-200"
                 >
                   <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold uppercase">
-                    {currentUser.name?.charAt(0) || (
+                    {currentUser.username?.charAt(0) || (
                       <User className="w-5 h-5" />
                     )}
                   </div>
                   <span className="text-sm font-medium text-slate-700 hidden sm:block">
-                    {currentUser.name}
+                    {currentUser.username}
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 text-slate-400 transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
