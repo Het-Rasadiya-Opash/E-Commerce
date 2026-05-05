@@ -2,9 +2,20 @@ import express from "express";
 import { authorizeRole } from "../middlewares/authRole.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { createProduct } from "../controllers/product.controler.js";
+import {
+  createProduct,
+  getProductById,
+  getProducts,
+  getProductsByUser,
+} from "../controllers/product.controler.js";
 
 const router = express.Router();
+
+router.get("/", getProducts);
+
+router.get("/user", authMiddleware, getProductsByUser);
+
+router.get("/:id", getProductById);
 
 router.post(
   "/create",
