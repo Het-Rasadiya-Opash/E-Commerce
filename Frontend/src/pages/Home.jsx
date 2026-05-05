@@ -62,7 +62,7 @@ const Home = () => {
   }, [fetchProducts]);
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#fcfcfd] pt-0 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
           <div className="flex items-center gap-4 w-full md:w-auto">
@@ -78,10 +78,10 @@ const Home = () => {
             </div>
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`flex items-center gap-2 px-6 py-4 rounded-xl border transition-all font-bold shadow-sm ${
+              className={`flex items-center gap-2 px-6 py-4 rounded-xl border transition-all font-bold shadow-sm active:scale-95 ${
                 isFilterOpen
                   ? "bg-indigo-600 border-indigo-600 text-white"
-                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                  : "bg-transparent border-slate-200 text-slate-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600"
               }`}
             >
               <SlidersHorizontal className="w-5 h-5" />
