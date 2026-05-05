@@ -12,6 +12,8 @@ import {
   Heart,
   Search,
   ChevronDown,
+  LayoutDashboard,
+  Plus,
 } from "lucide-react";
 import { logout } from "../features/usersSlice";
 import apiRequest from "../utils/apiRequest";
@@ -129,34 +131,48 @@ const Navbar = () => {
                           Account
                         </p>
                       </div>
-                      <Link
-                        to="/profile"
-                        className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        <User className="w-4 h-4" />
-                        <span>My Profile</span>
-                      </Link>
-                      <Link
-                        to="/orders"
-                        className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        <Package className="w-4 h-4" />
-                        <span>Orders</span>
-                      </Link>
-                      <Link
-                        to="/wishlist"
-                        className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        <Heart className="w-4 h-4" />
-                        <span>Wishlist</span>
-                      </Link>
-                      <Link
-                        to="/settings"
-                        className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                      >
-                        <Settings className="w-4 h-4" />
-                        <span>Settings</span>
-                      </Link>
+                      {currentUser.role === "ADMIN" ? (
+                        <>
+                          <Link
+                            to="/dashboard"
+                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <LayoutDashboard className="w-4 h-4" />
+                            <span>Dashboard</span>
+                          </Link>
+                          <Link
+                            to="/add-product"
+                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span>Add Product</span>
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            to="/profile"
+                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <User className="w-4 h-4" />
+                            <span>My Profile</span>
+                          </Link>
+                          <Link
+                            to="/orders"
+                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Package className="w-4 h-4" />
+                            <span>Orders</span>
+                          </Link>
+                          <Link
+                            to="/wishlist"
+                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                          >
+                            <Heart className="w-4 h-4" />
+                            <span>Wishlist</span>
+                          </Link>
+                        </>
+                      )}
                       <div className="my-1 border-t border-slate-100"></div>
                       <button
                         onClick={handleLogout}

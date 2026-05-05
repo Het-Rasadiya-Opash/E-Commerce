@@ -9,6 +9,9 @@ import Navbar from "./components/Navbar";
 import { useDispatch } from "react-redux";
 import apiRequest from "./utils/apiRequest";
 import { setCheckingAuth, setCurrentUser } from "./features/usersSlice";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
+import AddProduct from "./pages/AddProduct";
 
 const App = () => {
   const location = useLocation();
@@ -42,6 +45,11 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/add-product" element={<AddProduct />} />  
+          </Route>
         </Routes>
       </main>
       <ToastContainer position="bottom-right" />
