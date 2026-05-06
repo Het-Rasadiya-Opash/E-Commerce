@@ -136,7 +136,6 @@ const productSchema = new mongoose.Schema(
   },
 );
 
-// slug generation and totalStock calculation
 productSchema.pre("save", function () {
   if (this.isModified("name")) {
     this.slug = this.name
@@ -162,13 +161,16 @@ productSchema.methods.getVariant = function (variantId) {
   return this.variants.id(variantId);
 };
 
-// decrement stock for a variant
 productSchema.statics.decrementStock = function (productId, variantId, qty) {
   return this.findOneAndUpdate(
     {
       _id: productId,
-      "variants._id": variantId,
-      "variants.stock": { $gte: qty },
+      variants: {
+        $elemMatch: {
+          $or: [{ _id: variantId }, { sku: variantId }],
+          stock: { $gte: qty },
+        },
+      },
     },
     {
       $inc: {

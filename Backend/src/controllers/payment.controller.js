@@ -19,16 +19,13 @@ export const createPayment = asyncHandler(async (req, res) => {
         ? item.selectedVariant.price
         : item.product.basePrice;
 
-    const variantDetails = item.selectedVariant
+    const variantDetails = item.selectedVariant 
       ? ` (${[item.selectedVariant.color, item.selectedVariant.size].filter(Boolean).join(", ")})`
       : "";
 
-    const imageUrls =
-      item.selectedVariant?.images?.length > 0
-        ? item.selectedVariant.images
-        : item.product.images?.length > 0
-          ? item.product.images
-          : [];
+    const imageUrls = item.selectedVariant?.images?.length > 0 
+      ? item.selectedVariant.images 
+      : (item.product.images?.length > 0 ? item.product.images : []);
 
     return {
       price_data: {
@@ -37,30 +34,23 @@ export const createPayment = asyncHandler(async (req, res) => {
           name: `${item.product.name}${variantDetails}`,
           images: imageUrls.slice(0, 1),
         },
-        unit_amount: Math.round(price * 100),
+        unit_amount: Math.round(price * 100), 
       },
       quantity: item.cartQuantity,
     };
   });
 
   for (const item of products) {
-    const product = await productModel.findById(item.product._id);
-    if (!product) {
-      throw new ApiError(404, `Product not found: ${item.product.name}`);
-    }
-
-    if (item.selectedVariant) {
-      const variant = product.variants.id(item.selectedVariant._id);
-      if (!variant || variant.stock < item.cartQuantity) {
-        throw new ApiError(
-          400,
-          `Insufficient stock for ${item.product.name}${variant ? ` (${variant.color || variant.size})` : ""}`,
-        );
-      }
-    } else {
-      if (product.totalStock < item.cartQuantity) {
-        throw new ApiError(400, `Insufficient stock for ${item.product.name}`);
-      }
+    const updated = await productModel.decrementStock(
+      item.product._id,
+      item.selectedVariant?._id,
+      item.cartQuantity,
+    );
+    if (!updated) {
+      throw new ApiError(
+        400,
+        `Insufficient stock for ${item.product.name}${item.selectedVariant ? ` (${item.selectedVariant.color || item.selectedVariant.size})` : ""}`,
+      );
     }
   }
 
@@ -68,18 +58,8 @@ export const createPayment = asyncHandler(async (req, res) => {
     payment_method_types: ["card"],
     line_items: lineItems,
     mode: "payment",
-    // Store cart data in metadata to retrieve it in the webhook
-    metadata: {
-      cartItems: JSON.stringify(
-        products.map((item) => ({
-          productId: item.product._id,
-          variantId: item.selectedVariant?._id || null,
-          quantity: item.cartQuantity,
-        })),
-      ),
-    },
-    success_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/success`,
-    cancel_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/cancel`,
+    success_url: `${process.env.CLIENT_URL || "http://localhost:5173"}`,
+    cancel_url: `${process.env.CLIENT_URL || "http://localhost:5173"}`,
   });
 
   res
@@ -88,49 +68,7 @@ export const createPayment = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         { id: session.id, url: session.url },
-        "Payment session created",
+        "Payment session created and stock updated",
       ),
     );
-});
-
-export const stripeWebhook = asyncHandler(async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET,
-    );
-  } catch (err) {
-    console.error("Webhook signature verification failed:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Handle the checkout.session.completed event
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-
-    // Retrieve cart items from metadata
-    const cartItems = JSON.parse(session.metadata.cartItems);
-
-    console.log("Payment successful. Decrementing stock for items:", cartItems);
-
-    for (const item of cartItems) {
-      const updated = await productModel.decrementStock(
-        item.productId,
-        item.variantId,
-        item.quantity,
-      );
-
-      if (!updated) {
-        console.error(
-          `Failed to decrement stock for product ${item.productId} variant ${item.variantId}. Stock might have been depleted between session creation and payment.`,
-        );
-      }
-    }
-  }
-
-  res.status(200).json({ received: true });
 });
