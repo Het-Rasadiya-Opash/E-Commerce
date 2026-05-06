@@ -36,6 +36,7 @@ const AllOrdersShow = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showModal, setShowModal] = useState(false);
+  const [orderStatus, setOrderStatus] = useState("");
 
   const fetchAllOrders = async () => {
     dispatch(setLoading(true));
@@ -90,6 +91,21 @@ const AllOrdersShow = () => {
       toast.error(errorMsg);
     } finally {
       dispatch(setLoading(false));
+    }
+  };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const res = await apiRequest.patch(`/orders/${orderId}/status`, {
+        status: newStatus,
+      });
+      dispatch(updateOrder(res.data.data));
+      toast.success("Order status updated successfully");
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || "Failed to update order status";
+      dispatch(setError(errorMsg));
+      toast.error(errorMsg);
     }
   };
 
@@ -356,12 +372,28 @@ const AllOrdersShow = () => {
                         </p>
                       </td>
                       <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}
-                        >
-                          {getStatusIcon(order.status)}
-                          {order.status}
-                        </span>
+                        <div className="relative inline-block group/status">
+                          <select
+                            className={`appearance-none pl-8 pr-8 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 shadow-sm hover:shadow-md ${getStatusColor(order.status)}`}
+                            value={order.status}
+                            onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                          >
+                            <option value="PLACED" className="bg-white text-slate-900">PLACED</option>
+                            <option value="PAID" className="bg-white text-slate-900">PAID</option>
+                            <option value="PROCESSING" className="bg-white text-slate-900">PROCESSING</option>
+                            <option value="SHIPPED" className="bg-white text-slate-900">SHIPPED</option>
+                            <option value="OUT FOR DELIVERY" className="bg-white text-slate-900">OUT FOR DELIVERY</option>
+                            <option value="DELIVERED" className="bg-white text-slate-900">DELIVERED</option>
+                            <option value="CANCELLED" className="bg-white text-slate-900">CANCELLED</option>
+                            <option value="REFUNDED" className="bg-white text-slate-900">REFUNDED</option>
+                          </select>
+                          <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform group-hover/status:scale-110">
+                            {getStatusIcon(order.status)}
+                          </div>
+                          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 group-hover/status:opacity-100 transition-opacity">
+                            <ChevronRight size={12} className="rotate-90" />
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-5 text-right">
                         <div className="flex justify-end gap-2">
@@ -372,9 +404,7 @@ const AllOrdersShow = () => {
                           >
                             <Eye size={18} />
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                            <Edit size={18} />
-                          </button>
+
                           <button
                             onClick={() => handleCancelOrder(order._id)}
                             className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"

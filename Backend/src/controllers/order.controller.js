@@ -122,7 +122,10 @@ export const getOrderById = asyncHandler(async (req, res) => {
     query.user = req.user._id;
   }
 
-  const order = await orderModel.findOne(query).populate("user", "name email").populate("items.product", "name slug images");
+  const order = await orderModel
+    .findOne(query)
+    .populate("user", "name email")
+    .populate("items.product", "name slug images");
 
   if (!order) {
     throw new ApiError(404, "Order not found");
@@ -161,7 +164,11 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 
   // Restore stock
   for (const item of order.items) {
-    await productModel.incrementStock(item.product, item.variant, item.quantity);
+    await productModel.incrementStock(
+      item.product,
+      item.variant,
+      item.quantity,
+    );
   }
 
   return res
@@ -208,4 +215,62 @@ export const getOrdersByAdmin = asyncHandler(async (req, res) => {
       "Orders retrieved successfully",
     ),
   );
+});
+
+export const updateOrderStatusByAdmin = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const { status, note } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new ApiError(400, "Invalid order ID");
+  }
+
+  const order = await orderModel.findById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  const validStatuses = [
+    "PLACED",
+    "PAID",
+    "PROCESSING",
+    "SHIPPED",
+    "OUT FOR DELIVERY",
+    "DELIVERED",
+    "CANCELLED",
+    "REFUNDED",
+  ];
+
+  if (!validStatuses.includes(status)) {
+    throw new ApiError(400, "Invalid status");
+  }
+
+  if (status === "CANCELLED" && order.status !== "CANCELLED") {
+    for (const item of order.items) {
+      await productModel.incrementStock(
+        item.product,
+        item.variant,
+        item.quantity,
+      );
+    }
+  }
+
+  if (status === "PAID" && order.payment.status !== "PAID") {
+    order.payment.status = "PAID";
+    order.payment.isPaid = true;
+    order.payment.paidAt = new Date();
+  }
+
+  order.advanceStatus(
+    status,
+    note || `Order status updated to ${status} by Admin`,
+    req.user._id,
+  );
+
+  await order.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, order, "Order status updated successfully"));
 });
