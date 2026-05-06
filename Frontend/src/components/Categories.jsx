@@ -10,8 +10,12 @@ import {
   ArrowRight,
 } from "lucide-react";
 import apiRequest from "../utils/apiRequest";
+import { useDispatch } from "react-redux";
+import { addToCart, openCart } from "../features/cartSlice";
+import { toast } from "react-toastify";
 
 const Categories = () => {
+  const dispatch = useDispatch();
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [products, setProducts] = useState([]);
@@ -141,9 +145,24 @@ const Categories = () => {
                         )}
 
                         <div className="absolute top-4 right-4 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                          <div className="bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              dispatch(
+                                addToCart({
+                                  product: product,
+                                  selectedVariant: product.variants?.[0] || null,
+                                  quantity: 1,
+                                }),
+                              );
+                              dispatch(openCart());
+                              toast.success(`${product.name} added to cart!`);
+                            }}
+                            className="bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg hover:bg-white transition-colors"
+                          >
                             <ShoppingCart className="w-5 h-5 text-indigo-600" />
-                          </div>
+                          </button>
                         </div>
                       </div>
 

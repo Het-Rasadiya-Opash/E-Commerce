@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
+import { addToCart, openCart } from "../features/cartSlice";
 import {
   Star,
   ShoppingCart,
@@ -18,6 +20,7 @@ import { toast } from "react-toastify";
 const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -59,6 +62,8 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
+    dispatch(addToCart({ product, selectedVariant, quantity }));
+    dispatch(openCart());
     toast.success(`${product.name} added to cart!`);
   };
 

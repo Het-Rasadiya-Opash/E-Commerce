@@ -16,6 +16,7 @@ import {
   Plus,
 } from "lucide-react";
 import { logout } from "../features/usersSlice";
+import { toggleCart } from "../features/cartSlice";
 import apiRequest from "../utils/apiRequest";
 import { toast } from "react-toastify";
 
@@ -27,6 +28,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.users);
+  const { cartTotalQuantity } = useSelector((state) => state.cart);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,11 +92,16 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
+            <button 
+              onClick={() => dispatch(toggleCart())}
+              className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative"
+            >
               <ShoppingBag className="w-5 h-5" />
-              <span className="absolute top-1 right-1 bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white">
-                0
-              </span>
+              {cartTotalQuantity > 0 && (
+                <span className="absolute top-1 right-1 bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white">
+                  {cartTotalQuantity}
+                </span>
+              )}
             </button>
 
             {currentUser ? (

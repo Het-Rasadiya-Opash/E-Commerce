@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 import apiRequest from "../utils/apiRequest";
 import { setProducts, setLoading, setError } from "../features/productSlice";
+import { addToCart, openCart } from "../features/cartSlice";
 import { Link } from "react-router";
+import { toast } from "react-toastify";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -293,7 +295,22 @@ const Home = () => {
                               ₹{product.basePrice?.toLocaleString()}
                             </span>
                           </div>
-                          <button className="h-12 w-12 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors flex items-center justify-center group/btn">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              dispatch(
+                                addToCart({
+                                  product: product,
+                                  selectedVariant: product.variants?.[0] || null,
+                                  quantity: 1,
+                                }),
+                              );
+                              dispatch(openCart());
+                              toast.success(`${product.name} added to cart!`);
+                            }}
+                            className="h-12 w-12 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors flex items-center justify-center group/btn"
+                          >
                             <ShoppingCart className="w-5 h-5" />
                           </button>
                         </div>

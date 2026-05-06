@@ -14,6 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import AddProduct from "./pages/AddProduct";
 import ProductDetail from "./pages/ProductDetail";
 import Categories from "./components/Categories";
+import Cart from "./pages/Cart";
+import CartDrawer from "./components/CartDrawer";
 
 const App = () => {
   const location = useLocation();
@@ -42,6 +44,7 @@ const App = () => {
   return (
     <div className="min-h-screen">
       {!hideNavbar && <Navbar />}
+      <CartDrawer />
       <main className={!hideNavbar ? "pt-24" : ""}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -50,6 +53,7 @@ const App = () => {
 
           <Route path="/product/:productId" element={<ProductDetail />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/cart" element={<Cart />} />
 
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />

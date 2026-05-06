@@ -9,7 +9,7 @@ import {
   getProductsByUser,
   deleteProduct,
   getAllCategories,
-} from "../controllers/product.controler.js";
+} from "../controllers/product.controller.js";
 
 const router = express.Router();
 
