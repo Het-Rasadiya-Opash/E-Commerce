@@ -1,4 +1,31 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import apiRequest from "../utils/apiRequest";
+import { toast } from "react-toastify";
+
+export const checkout = createAsyncThunk(
+  "cart/checkout",
+  async (cartItems, { rejectWithValue }) => {
+    try {
+      const response = await apiRequest.post("/payment/create-checkout-session", {
+        products: cartItems,
+      });
+
+      const sessionUrl = response.data?.data?.url;
+
+      if (sessionUrl) {
+        window.location.href = sessionUrl;
+      } else {
+        throw new Error("Stripe session URL not found");
+      }
+
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || error.message || "Checkout failed";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  },
+);
 
 const initialState = {
   cartItems: localStorage.getItem("cartItems")
@@ -7,6 +34,7 @@ const initialState = {
   cartTotalQuantity: 0,
   cartTotalAmount: 0,
   isCartOpen: false,
+  isLoading: false,
 };
 
 const cartSlice = createSlice({
@@ -108,6 +136,18 @@ const cartSlice = createSlice({
     toggleCart(state) {
       state.isCartOpen = !state.isCartOpen;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(checkout.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(checkout.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(checkout.rejected, (state) => {
+        state.isLoading = false;
+      });
   },
 });
 

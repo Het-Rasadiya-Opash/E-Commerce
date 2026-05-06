@@ -16,6 +16,7 @@ import {
   removeFromCart,
   clearCart,
   getTotals,
+  checkout,
 } from "../features/cartSlice";
 
 const Cart = () => {
@@ -89,7 +90,7 @@ const Cart = () => {
             className="text-sm font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1 bg-rose-50 px-4 py-2 rounded-lg transition-colors"
           >
             <Trash2 size={16} />
-            Clear Cart
+            <span class="hidden lg:block">Clear Cart</span>
           </button>
         </div>
 
@@ -221,9 +222,19 @@ const Cart = () => {
                 </p>
               </div>
 
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]">
-                <CreditCard size={20} />
-                Checkout Securely
+              <button
+                disabled={cart.isLoading}
+                onClick={() => dispatch(checkout(cart.cartItems))}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
+              >
+                {cart.isLoading ? (
+                  "Processing..."
+                ) : (
+                  <>
+                    <CreditCard size={20} />
+                    Checkout Securely
+                  </>
+                )}
               </button>
 
               <div className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-500">

@@ -5,6 +5,7 @@ import errorHandler from "./middlewares/error.middleware.js";
 export const app = express();
 import usersRouter from "./routes/users.route.js";
 import productRouter from "./routes/product.route.js";
+import paymentRouter from "./routes/payment.route.js";
 
 app.use(
   cors({
@@ -20,6 +21,7 @@ app.use(express.static("public"));
 
 app.use("/api/users", usersRouter);
 app.use("/api/products", productRouter);
+app.use("/api/payment", paymentRouter);
 
 //error handler
 app.use(errorHandler);

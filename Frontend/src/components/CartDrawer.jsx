@@ -18,10 +18,11 @@ import {
   clearCart,
   getTotals,
   closeCart,
+  checkout,
 } from "../features/cartSlice";
 
 const CartDrawer = () => {
-  const { cartItems, cartTotalAmount, cartTotalQuantity, isCartOpen } =
+  const { cartItems, cartTotalAmount, cartTotalQuantity, isCartOpen, isLoading } =
     useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -204,8 +205,12 @@ const CartDrawer = () => {
             </div>
 
             <div className="space-y-3">
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]">
-                Checkout <ArrowRight size={18} />
+              <button
+                disabled={isLoading}
+                onClick={() => dispatch(checkout(cartItems))}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
+              >
+                {isLoading ? "Processing..." : "Checkout"} <ArrowRight size={18} />
               </button>
               <button
                 onClick={() => {
