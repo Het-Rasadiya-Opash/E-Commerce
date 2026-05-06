@@ -193,11 +193,25 @@ export const verifySession = asyncHandler(async (req, res) => {
     idempotencyKey: sessionId,
   };
 
-  const order = await orderModel.create(orderData);
+  try {
+    const order = await orderModel.create(orderData);
 
-  res
-    .status(201)
-    .json(
-      new ApiResponse(201, order, "Order created successfully after payment"),
-    );
+    res
+      .status(201)
+      .json(
+        new ApiResponse(201, order, "Order created successfully after payment"),
+      );
+  } catch (error) {
+    if (error.code === 11000 && error.keyPattern?.idempotencyKey) {
+      const existingOrder = await orderModel.findOne({
+        idempotencyKey: sessionId,
+      });
+      if (existingOrder) {
+        return res
+          .status(200)
+          .json(new ApiResponse(200, existingOrder, "Order already created"));
+      }
+    }
+    throw error;
+  }
 });

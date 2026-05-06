@@ -254,8 +254,8 @@ const orderSchema = new mongoose.Schema(
 orderSchema.pre("save", async function () {
   if (!this.orderNumber) {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    const count = await mongoose.model("Order").countDocuments();
-    this.orderNumber = `ORD-${date}-${String(count + 1).padStart(5, "0")}`;
+    const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+    this.orderNumber = `ORD-${date}-${randomSuffix}`;
   }
 });
 

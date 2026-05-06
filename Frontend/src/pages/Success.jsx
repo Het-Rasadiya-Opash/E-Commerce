@@ -17,12 +17,15 @@ const Success = () => {
   const [status, setStatus] = useState("loading");
   const [order, setOrder] = useState(null);
 
+  const verified = React.useRef(false);
+
   useEffect(() => {
     const handlePaymentSuccess = async () => {
-      if (!sessionId) {
-        setStatus("error");
+      if (!sessionId || verified.current) {
         return;
       }
+
+      verified.current = true;
 
       try {
         const result = await dispatch(verifyPayment(sessionId));
