@@ -12,11 +12,14 @@ import { authorizeRole } from "../middlewares/authRole.middleware.js";
 const router = express.Router();
 
 router.get("/", authMiddleware, getOrdersByUser);
-router.get("/admin/all-orders", authMiddleware, authorizeRole("ADMIN"), getOrdersByAdmin);
+router.get(
+  "/admin/all-orders",
+  authMiddleware,
+  authorizeRole("ADMIN"),
+  getOrdersByAdmin,
+);
 router.get("/:orderId", authMiddleware, getOrderById);
 router.post("/create", authMiddleware, createOrder);
 router.post("/:orderId/cancel", authMiddleware, cancelOrder);
-
-
 
 export default router;

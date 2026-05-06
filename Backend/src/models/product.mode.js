@@ -187,5 +187,26 @@ productSchema.statics.decrementStock = function (
   );
 };
 
+productSchema.statics.incrementStock = function (
+  productId,
+  variantId,
+  qty,
+  options = {},
+) {
+  return this.findOneAndUpdate(
+    {
+      _id: productId,
+      "variants._id": variantId,
+    },
+    {
+      $inc: {
+        "variants.$.stock": qty,
+        totalStock: qty,
+      },
+    },
+    { returnDocument: "after", ...options },
+  );
+};
+
 const productModel = mongoose.model("Product", productSchema);
 export default productModel;

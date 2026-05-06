@@ -117,10 +117,12 @@ export const getOrderById = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid order ID");
   }
 
-  const order = await orderModel.findOne({
-    _id: orderId,
-    user: req.user._id,
-  });
+  const query = { _id: orderId };
+  if (req.user.role !== "ADMIN") {
+    query.user = req.user._id;
+  }
+
+  const order = await orderModel.findOne(query).populate("user", "name email").populate("items.product", "name slug images");
 
   if (!order) {
     throw new ApiError(404, "Order not found");
@@ -139,10 +141,12 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid order ID");
   }
 
-  const order = await orderModel.findOne({
-    _id: orderId,
-    user: req.user._id,
-  });
+  const query = { _id: orderId };
+  if (req.user.role !== "ADMIN") {
+    query.user = req.user._id;
+  }
+
+  const order = await orderModel.findOne(query);
 
   if (!order) {
     throw new ApiError(404, "Order not found");
@@ -154,6 +158,11 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 
   order.advanceStatus("CANCELLED", reason || "Cancelled by user", req.user._id);
   await order.save();
+
+  // Restore stock
+  for (const item of order.items) {
+    await productModel.incrementStock(item.product, item.variant, item.quantity);
+  }
 
   return res
     .status(200)

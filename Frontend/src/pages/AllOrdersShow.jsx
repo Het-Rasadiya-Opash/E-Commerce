@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setLoading, setOrders, setError } from "../features/orderSlice";
+import {
+  setLoading,
+  setOrders,
+  setError,
+  setCurrentOrder,
+  updateOrder,
+} from "../features/orderSlice";
 import apiRequest from "../utils/apiRequest";
 import {
   Package,
@@ -17,13 +23,19 @@ import {
   XCircle,
   Clock,
   RefreshCcw,
+  Edit,
+  X,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const AllOrdersShow = () => {
-  const { orders, loading, error } = useSelector((state) => state.orders);
+  const { orders, loading, error, currentOrder } = useSelector(
+    (state) => state.orders,
+  );
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [showModal, setShowModal] = useState(false);
 
   const fetchAllOrders = async () => {
     dispatch(setLoading(true));
@@ -39,6 +51,48 @@ const AllOrdersShow = () => {
     }
   };
 
+  const handleViewDetails = async (orderId) => {
+    dispatch(setLoading(true));
+    try {
+      const res = await apiRequest.get(`/orders/${orderId}`);
+      dispatch(setCurrentOrder(res.data.data));
+      setShowModal(true);
+    } catch (err) {
+      dispatch(
+        setError(
+          err.response?.data?.message || "Failed to fetch order details",
+        ),
+      );
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel this order? This action cannot be undone.",
+      )
+    ) {
+      return;
+    }
+
+    dispatch(setLoading(true));
+    try {
+      const res = await apiRequest.post(`/orders/${orderId}/cancel`, {
+        reason: "Cancelled by admin from dashboard",
+      });
+      dispatch(updateOrder(res.data.data));
+      toast.success("Order cancelled successfully");
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Failed to cancel order";
+      dispatch(setError(errorMsg));
+      toast.error(errorMsg);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
   useEffect(() => {
     fetchAllOrders();
   }, [dispatch]);
@@ -46,7 +100,7 @@ const AllOrdersShow = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "PLACED":
-        return "bg-indigo-100 text-indigo-700 border-indigo-200";
+        return "bg-indigo-100 text-blue-700 border-blue-200";
       case "PAID":
         return "bg-indigo-100 text-indigo-700 border-indigo-200";
       case "PROCESSING":
@@ -312,13 +366,20 @@ const AllOrdersShow = () => {
                       <td className="px-6 py-5 text-right">
                         <div className="flex justify-end gap-2">
                           <button
+                            onClick={() => handleViewDetails(order._id)}
                             className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                             title="View Details"
                           >
                             <Eye size={18} />
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-                            <MoreVertical size={18} />
+                          <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleCancelOrder(order._id)}
+                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          >
+                            <X size={18} />
                           </button>
                         </div>
                       </td>
@@ -380,6 +441,200 @@ const AllOrdersShow = () => {
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in duration-300">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  Order Details
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full border ${getStatusColor(currentOrder?.status)}`}
+                  >
+                    {currentOrder?.status}
+                  </span>
+                </h2>
+                <p className="text-sm text-slate-500">
+                  #{currentOrder?.orderNumber} •{" "}
+                  {new Date(currentOrder?.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400 hover:text-slate-600"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Customer Info */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <User size={16} className="text-indigo-500" />
+                    Customer Info
+                  </h3>
+                  <div className="bg-slate-50 p-4 rounded-2xl space-y-2">
+                    <p className="text-sm font-semibold text-slate-900">
+                      {currentOrder?.shippingAddress.fullName}
+                    </p>
+                    <p className="text-xs text-slate-600 flex items-center gap-2">
+                      {currentOrder?.user?.email}
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      {currentOrder?.shippingAddress.phone}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <Truck size={16} className="text-indigo-500" />
+                    Shipping Address
+                  </h3>
+                  <div className="bg-slate-50 p-4 rounded-2xl space-y-1">
+                    <p className="text-xs text-slate-600">
+                      {currentOrder?.shippingAddress.addressLine1}
+                    </p>
+                    {currentOrder?.shippingAddress.addressLine2 && (
+                      <p className="text-xs text-slate-600">
+                        {currentOrder?.shippingAddress.addressLine2}
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-600">
+                      {currentOrder?.shippingAddress.city},{" "}
+                      {currentOrder?.shippingAddress.state} -{" "}
+                      {currentOrder?.shippingAddress.pincode}
+                    </p>
+                    <p className="text-xs text-slate-600 font-medium mt-2">
+                      {currentOrder?.shippingAddress.country}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <CreditCard size={16} className="text-indigo-500" />
+                    Payment Details
+                  </h3>
+                  <div className="bg-slate-50 p-4 rounded-2xl space-y-2">
+                    <p className="text-xs text-slate-600 flex justify-between">
+                      Method:{" "}
+                      <span className="font-bold text-slate-900 uppercase">
+                        {currentOrder?.payment.method}
+                      </span>
+                    </p>
+                    <p className="text-xs text-slate-600 flex justify-between">
+                      Status:{" "}
+                      <span className="font-bold text-indigo-600">
+                        {currentOrder?.payment.status}
+                      </span>
+                    </p>
+                    {currentOrder?.payment.transactionId && (
+                      <p className="text-[10px] text-slate-400 break-all mt-2">
+                        TXN: {currentOrder?.payment.transactionId}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Package size={16} className="text-indigo-500" />
+                  Order Items ({currentOrder?.items.length})
+                </h3>
+                <div className="border border-slate-100 rounded-2xl overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase">
+                      <tr>
+                        <th className="px-4 py-3">Product</th>
+                        <th className="px-4 py-3 text-center">Qty</th>
+                        <th className="px-4 py-3 text-right">Price</th>
+                        <th className="px-4 py-3 text-right">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {currentOrder?.items.map((item, idx) => (
+                        <tr key={idx} className="text-sm">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={item.snapshot.image}
+                                alt={item.snapshot.productName}
+                                className="w-12 h-12 rounded-lg object-cover bg-slate-50"
+                              />
+                              <div>
+                                <p className="font-semibold text-slate-900 line-clamp-1">
+                                  {item.snapshot.productName}
+                                </p>
+                                <p className="text-[10px] text-slate-500">
+                                  {item.snapshot.color} • {item.snapshot.size} •{" "}
+                                  {item.snapshot.sku}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-center text-slate-600 font-medium">
+                            {item.quantity}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-600">
+                            ₹{item.snapshot.paidPrice.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-right font-bold text-slate-900">
+                            ₹{item.lineTotal.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1">
+                {currentOrder?.notes && (
+                  <div className="text-xs text-slate-500 max-w-md">
+                    <span className="font-bold uppercase text-[10px]">
+                      Notes:
+                    </span>{" "}
+                    {currentOrder?.notes}
+                  </div>
+                )}
+              </div>
+              <div className="w-full md:w-64 space-y-2">
+                <div className="flex justify-between text-sm text-slate-600">
+                  <span>Subtotal</span>
+                  <span>₹{currentOrder?.subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm text-slate-600">
+                  <span>Tax</span>
+                  <span>₹{currentOrder?.tax.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm text-slate-600">
+                  <span>Shipping</span>
+                  <span>₹{currentOrder?.shippingFee.toLocaleString()}</span>
+                </div>
+                {currentOrder?.discount > 0 && (
+                  <div className="flex justify-between text-sm text-rose-600">
+                    <span>Discount</span>
+                    <span>-₹{currentOrder?.discount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-lg font-bold text-slate-900 pt-2 border-t border-slate-200">
+                  <span>Grand Total</span>
+                  <span className="text-indigo-600">
+                    ₹{currentOrder?.grandTotal.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
