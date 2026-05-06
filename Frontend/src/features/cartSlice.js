@@ -2,13 +2,36 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiRequest from "../utils/apiRequest";
 import { toast } from "react-toastify";
 
+export const createOrder = createAsyncThunk(
+  "cart/createOrder",
+  async (orderData, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await apiRequest.post("/orders/create", orderData);
+      toast.success("Order placed successfully!");
+      dispatch(clearCart());
+      return response.data;
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to place order";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  },
+);
+
 export const checkout = createAsyncThunk(
   "cart/checkout",
-  async (cartItems, { rejectWithValue }) => {
+  async ({ cartItems, orderData }, { rejectWithValue }) => {
     try {
-      const response = await apiRequest.post("/payment/create-checkout-session", {
-        products: cartItems,
-      });
+      const response = await apiRequest.post(
+        "/payment/create-checkout-session",
+        {
+          products: cartItems,
+          orderData,
+        },
+      );
 
       const sessionUrl = response.data?.data?.url;
 
@@ -20,7 +43,27 @@ export const checkout = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || error.message || "Checkout failed";
+      const message =
+        error.response?.data?.message || error.message || "Checkout failed";
+      toast.error(message);
+      return rejectWithValue(message);
+    }
+  },
+);
+
+export const verifyPayment = createAsyncThunk(
+  "cart/verifyPayment",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      const response = await apiRequest.post("/payment/verify-session", {
+        sessionId,
+      });
+      return response.data;
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Payment verification failed";
       toast.error(message);
       return rejectWithValue(message);
     }
@@ -147,11 +190,37 @@ const cartSlice = createSlice({
       })
       .addCase(checkout.rejected, (state) => {
         state.isLoading = false;
+      })
+      .addCase(createOrder.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(createOrder.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(createOrder.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(verifyPayment.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(verifyPayment.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(verifyPayment.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });
 
-export const { addToCart, removeFromCart, decreaseCart, clearCart, getTotals, openCart, closeCart, toggleCart } =
-  cartSlice.actions;
+export const {
+  addToCart,
+  removeFromCart,
+  decreaseCart,
+  clearCart,
+  getTotals,
+  openCart,
+  closeCart,
+  toggleCart,
+} = cartSlice.actions;
 
 export default cartSlice.reducer;

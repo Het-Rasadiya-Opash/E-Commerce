@@ -16,6 +16,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Categories from "./components/Categories";
 import Cart from "./pages/Cart";
 import CartDrawer from "./components/CartDrawer";
+import Success from "./pages/Success";
 
 const App = () => {
   const location = useLocation();
@@ -54,6 +55,7 @@ const App = () => {
           <Route path="/product/:productId" element={<ProductDetail />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/success" element={<Success />} />
 
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />

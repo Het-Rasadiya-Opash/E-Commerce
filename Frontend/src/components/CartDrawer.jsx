@@ -19,6 +19,7 @@ import {
   getTotals,
   closeCart,
   checkout,
+  createOrder,
 } from "../features/cartSlice";
 
 const CartDrawer = () => {
@@ -207,10 +208,14 @@ const CartDrawer = () => {
             <div className="space-y-3">
               <button
                 disabled={isLoading}
-                onClick={() => dispatch(checkout(cartItems))}
+                onClick={() => {
+                  handleClose();
+                  navigate("/cart");
+                }}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
               >
-                {isLoading ? "Processing..." : "Checkout"} <ArrowRight size={18} />
+                {isLoading ? "Processing..." : "Checkout (COD/Card)"}{" "}
+                <ArrowRight size={18} />
               </button>
               <button
                 onClick={() => {

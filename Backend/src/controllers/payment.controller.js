@@ -3,11 +3,12 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import Stripe from "stripe";
 import productModel from "../models/product.mode.js";
+import orderModel from "../models/order.model.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createPayment = asyncHandler(async (req, res) => {
-  const { products } = req.body;
+  const { products, orderData } = req.body;
 
   if (!products || !Array.isArray(products) || products.length === 0) {
     throw new ApiError(400, "No products provided for payment");
@@ -19,13 +20,16 @@ export const createPayment = asyncHandler(async (req, res) => {
         ? item.selectedVariant.price
         : item.product.basePrice;
 
-    const variantDetails = item.selectedVariant 
+    const variantDetails = item.selectedVariant
       ? ` (${[item.selectedVariant.color, item.selectedVariant.size].filter(Boolean).join(", ")})`
       : "";
 
-    const imageUrls = item.selectedVariant?.images?.length > 0 
-      ? item.selectedVariant.images 
-      : (item.product.images?.length > 0 ? item.product.images : []);
+    const imageUrls =
+      item.selectedVariant?.images?.length > 0
+        ? item.selectedVariant.images
+        : item.product.images?.length > 0
+          ? item.product.images
+          : [];
 
     return {
       price_data: {
@@ -33,33 +37,36 @@ export const createPayment = asyncHandler(async (req, res) => {
         product_data: {
           name: `${item.product.name}${variantDetails}`,
           images: imageUrls.slice(0, 1),
+          metadata: {
+            productId: item.product._id.toString(),
+            variantId: item.selectedVariant?._id?.toString() || "",
+          },
         },
-        unit_amount: Math.round(price * 100), 
+        unit_amount: Math.round(price * 100),
       },
       quantity: item.cartQuantity,
     };
   });
 
-  for (const item of products) {
-    const updated = await productModel.decrementStock(
-      item.product._id,
-      item.selectedVariant?._id,
-      item.cartQuantity,
-    );
-    if (!updated) {
-      throw new ApiError(
-        400,
-        `Insufficient stock for ${item.product.name}${item.selectedVariant ? ` (${item.selectedVariant.color || item.selectedVariant.size})` : ""}`,
-      );
-    }
-  }
-
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: lineItems,
     mode: "payment",
-    success_url: `${process.env.CLIENT_URL || "http://localhost:5173"}`,
-    cancel_url: `${process.env.CLIENT_URL || "http://localhost:5173"}`,
+    metadata: {
+      fullName: orderData.shippingAddress.fullName,
+      phone: orderData.shippingAddress.phone,
+      street: orderData.shippingAddress.street,
+      city: orderData.shippingAddress.city,
+      state: orderData.shippingAddress.state,
+      zip: orderData.shippingAddress.zip,
+      country: orderData.shippingAddress.country,
+      notes: orderData.notes || "",
+      subtotal: orderData.subtotal.toString(),
+      grandTotal: orderData.grandTotal.toString(),
+      userId: req.user._id.toString(),
+    },
+    success_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/cart`,
   });
 
   res
@@ -68,7 +75,129 @@ export const createPayment = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         { id: session.id, url: session.url },
-        "Payment session created and stock updated",
+        "Payment session created",
       ),
+    );
+});
+
+export const verifySession = asyncHandler(async (req, res) => {
+  const { sessionId } = req.body;
+
+  if (!sessionId) {
+    throw new ApiError(400, "Session ID is required");
+  }
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ["line_items.data.price.product"],
+  });
+
+  if (session.payment_status !== "paid") {
+    throw new ApiError(400, "Payment not completed");
+  }
+
+  const existingOrder = await orderModel.findOne({ idempotencyKey: sessionId });
+  if (existingOrder) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, existingOrder, "Order already created"));
+  }
+
+  const {
+    fullName,
+    phone,
+    street,
+    city,
+    state,
+    zip,
+    country,
+    notes,
+    subtotal,
+    grandTotal,
+    userId,
+  } = session.metadata;
+
+  const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, {
+    expand: ["data.price.product"],
+  });
+
+  const processedItems = [];
+
+  for (const item of lineItems.data) {
+    const stripeProduct = item.price.product;
+    const { productId, variantId } = stripeProduct.metadata;
+
+    const updatedProduct = await productModel.decrementStock(
+      productId,
+      variantId,
+      item.quantity,
+    );
+
+    if (!updatedProduct) {
+      throw new ApiError(
+        400,
+        `Insufficient stock for product: ${stripeProduct.name}`,
+      );
+    }
+
+    const variant = variantId ? updatedProduct.variants.id(variantId) : null;
+
+    processedItems.push({
+      product: productId,
+      variant: variantId || null,
+      snapshot: {
+        productName: updatedProduct.name,
+        sku: variant?.sku || "N/A",
+        size: variant?.size || "",
+        color: variant?.color || "",
+        image: variant?.images?.[0] || updatedProduct.images?.[0] || "",
+        originalPrice: variant?.price || updatedProduct.basePrice,
+        paidPrice: item.price.unit_amount / 100,
+      },
+      quantity: item.quantity,
+      lineTotal: (item.price.unit_amount / 100) * item.quantity,
+    });
+  }
+
+  const orderData = {
+    user: userId,
+    items: processedItems,
+    shippingAddress: {
+      fullName,
+      phone,
+      street,
+      city,
+      state,
+      zip,
+      country,
+    },
+    payment: {
+      method: "CARD",
+      status: "PAID",
+      isPaid: true,
+      paidAt: new Date(),
+    },
+    subtotal: parseFloat(subtotal),
+    grandTotal: parseFloat(grandTotal),
+    notes,
+    status: "PAID",
+    statusTimeline: [
+      {
+        status: "PLACED",
+        updatedBy: userId,
+      },
+      {
+        status: "PAID",
+        updatedBy: userId,
+      },
+    ],
+    idempotencyKey: sessionId,
+  };
+
+  const order = await orderModel.create(orderData);
+
+  res
+    .status(201)
+    .json(
+      new ApiResponse(201, order, "Order created successfully after payment"),
     );
 });
