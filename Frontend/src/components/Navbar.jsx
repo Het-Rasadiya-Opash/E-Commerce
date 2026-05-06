@@ -14,6 +14,7 @@ import {
   ChevronDown,
   LayoutDashboard,
   Plus,
+  ListOrdered,
 } from "lucide-react";
 import { logout } from "../features/usersSlice";
 import { toggleCart } from "../features/cartSlice";
@@ -92,7 +93,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button 
+            <button
               onClick={() => dispatch(toggleCart())}
               className="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative"
             >
@@ -145,11 +146,12 @@ const Navbar = () => {
                             <span>Dashboard</span>
                           </Link>
                           <Link
-                            to="/add-product"
+                            to="/orders/admin/all-orders"
                             className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                           >
-                            <Plus className="w-4 h-4" />
-                            <span>Add Product</span>
+                            <ListOrdered className="w-4 h-4" />
+
+                            <span>All Orders</span>
                           </Link>
                         </>
                       ) : (

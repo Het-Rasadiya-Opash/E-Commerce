@@ -159,3 +159,44 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, order, "Order cancelled successfully"));
 });
+
+export const getOrdersByAdmin = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10, status, search } = req.query;
+
+  const filter = {};
+  if (status) {
+    filter.status = status;
+  }
+
+  if (search) {
+    filter.$or = [{ orderNumber: { $regex: search, $options: "i" } }];
+  }
+
+  const skip = (page - 1) * limit;
+
+  const orders = await orderModel
+    .find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit))
+    .populate("user", "name email")
+    .populate("items.product", "name slug images");
+
+  const total = await orderModel.countDocuments(filter);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        orders,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(total / limit),
+        },
+      },
+      "Orders retrieved successfully",
+    ),
+  );
+});
