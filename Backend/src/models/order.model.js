@@ -62,16 +62,7 @@ const statusEventSchema = new mongoose.Schema(
   {
     status: {
       type: String,
-      enum: [
-        "PLACED",
-        "PAID",
-        "PROCESSING",
-        "SHIPPED",
-        "OUT FOR DELIVERY",
-        "DELIVERED",
-        "CANCELLED",
-        "REFUNDED",
-      ],
+      enum: ["PLACED", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"],
       required: true,
     },
     timestamp: {
@@ -218,16 +209,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [
-        "PLACED",
-        "PAID",
-        "PROCESSING",
-        "SHIPPED",
-        "OUT FOR DELIVERY",
-        "DELIVERED",
-        "CANCELLED",
-        "REFUNDED",
-      ],
+      enum: ["PLACED", "PAID", "SHIPPED", , "DELIVERED", "CANCELLED"],
       default: "PLACED",
       index: true,
     },
@@ -258,7 +240,10 @@ const orderSchema = new mongoose.Schema(
 orderSchema.pre("save", async function () {
   if (!this.orderNumber) {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const randomSuffix = Math.random()
+      .toString(36)
+      .substring(2, 7)
+      .toUpperCase();
     this.orderNumber = `ORD-${date}-${randomSuffix}`;
   }
 });

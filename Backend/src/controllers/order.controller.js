@@ -231,16 +231,7 @@ export const updateOrderStatusByAdmin = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Order not found");
   }
 
-  const validStatuses = [
-    "PLACED",
-    "PAID",
-    "PROCESSING",
-    "SHIPPED",
-    "OUT FOR DELIVERY",
-    "DELIVERED",
-    "CANCELLED",
-    "REFUNDED",
-  ];
+  const validStatuses = ["PLACED", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
 
   if (!validStatuses.includes(status)) {
     throw new ApiError(400, "Invalid status");

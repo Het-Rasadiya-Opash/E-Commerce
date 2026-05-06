@@ -116,21 +116,18 @@ const AllOrdersShow = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "PLACED":
-        return "bg-indigo-100 text-blue-700 border-blue-200";
+        return "bg-blue-100 text-blue-700 border-blue-200";
       case "PAID":
-        return "bg-indigo-100 text-indigo-700 border-indigo-200";
-      case "PROCESSING":
-        return "bg-amber-100 text-amber-700 border-amber-200";
-      case "SHIPPED":
-        return "bg-purple-100 text-purple-700 border-purple-200";
-      case "OUT FOR DELIVERY":
-        return "bg-orange-100 text-orange-700 border-orange-200";
-      case "DELIVERED":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
+
+      case "SHIPPED":
+        return "bg-indigo-100 text-indigo-700 border-indigo-200";
+
+      case "DELIVERED":
+        return "bg-green-100 text-green-700 border-green-200";
       case "CANCELLED":
         return "bg-rose-100 text-rose-700 border-rose-200";
-      case "REFUNDED":
-        return "bg-slate-100 text-slate-700 border-slate-200";
+
       default:
         return "bg-gray-100 text-gray-700 border-gray-200";
     }
@@ -142,16 +139,15 @@ const AllOrdersShow = () => {
         return <Clock size={14} />;
       case "PAID":
         return <CreditCard size={14} />;
-      case "PROCESSING":
-        return <RefreshCcw size={14} className="animate-spin-slow" />;
+
       case "SHIPPED":
-        return <Package size={14} />;
-      case "OUT FOR DELIVERY":
         return <Truck size={14} />;
+
       case "DELIVERED":
         return <CheckCircle2 size={14} />;
       case "CANCELLED":
         return <XCircle size={14} />;
+
       default:
         return null;
     }
@@ -204,9 +200,8 @@ const AllOrdersShow = () => {
             },
             {
               label: "Pending",
-              value: orders.filter((o) =>
-                ["PLACED", "PAID", "PROCESSING"].includes(o.status),
-              ).length,
+              value: orders.filter((o) => ["PLACED", "PAID"].includes(o.status))
+                .length,
               icon: Clock,
               color: "text-amber-600",
               bg: "bg-amber-50",
@@ -273,12 +268,9 @@ const AllOrdersShow = () => {
                 <option value="ALL">All Statuses</option>
                 <option value="PLACED">Placed</option>
                 <option value="PAID">Paid</option>
-                <option value="PROCESSING">Processing</option>
                 <option value="SHIPPED">Shipped</option>
-                <option value="OUT FOR DELIVERY">Out for Delivery</option>
                 <option value="DELIVERED">Delivered</option>
                 <option value="CANCELLED">Cancelled</option>
-                <option value="REFUNDED">Refunded</option>
               </select>
             </div>
           </div>
@@ -376,16 +368,42 @@ const AllOrdersShow = () => {
                           <select
                             className={`appearance-none pl-8 pr-8 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 shadow-sm hover:shadow-md ${getStatusColor(order.status)}`}
                             value={order.status}
-                            onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                            onChange={(e) =>
+                              handleStatusChange(order._id, e.target.value)
+                            }
                           >
-                            <option value="PLACED" className="bg-white text-slate-900">PLACED</option>
-                            <option value="PAID" className="bg-white text-slate-900">PAID</option>
-                            <option value="PROCESSING" className="bg-white text-slate-900">PROCESSING</option>
-                            <option value="SHIPPED" className="bg-white text-slate-900">SHIPPED</option>
-                            <option value="OUT FOR DELIVERY" className="bg-white text-slate-900">OUT FOR DELIVERY</option>
-                            <option value="DELIVERED" className="bg-white text-slate-900">DELIVERED</option>
-                            <option value="CANCELLED" className="bg-white text-slate-900">CANCELLED</option>
-                            <option value="REFUNDED" className="bg-white text-slate-900">REFUNDED</option>
+                            <option
+                              value="PLACED"
+                              className="bg-white text-slate-900"
+                            >
+                              PLACED
+                            </option>
+                            <option
+                              value="PAID"
+                              className="bg-white text-slate-900"
+                            >
+                              PAID
+                            </option>
+
+                            <option
+                              value="SHIPPED"
+                              className="bg-white text-slate-900"
+                            >
+                              SHIPPED
+                            </option>
+
+                            <option
+                              value="DELIVERED"
+                              className="bg-white text-slate-900"
+                            >
+                              DELIVERED
+                            </option>
+                            <option
+                              value="CANCELLED"
+                              className="bg-white text-slate-900"
+                            >
+                              CANCELLED
+                            </option>
                           </select>
                           <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform group-hover/status:scale-110">
                             {getStatusIcon(order.status)}
