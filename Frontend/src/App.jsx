@@ -17,6 +17,7 @@ import Categories from "./components/Categories";
 import Cart from "./pages/Cart";
 import CartDrawer from "./components/CartDrawer";
 import Success from "./pages/Success";
+import Orders from "./pages/Orders";
 
 const App = () => {
   const location = useLocation();
@@ -51,6 +52,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/orders" element={<Orders />} />
 
           <Route path="/product/:productId" element={<ProductDetail />} />
           <Route path="/categories" element={<Categories />} />

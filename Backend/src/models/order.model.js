@@ -82,6 +82,10 @@ const statusEventSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    note: {
+      type: String,
+      trim: true,
+    },
   },
   { _id: false },
 );

@@ -35,13 +35,13 @@ export const createOrder = asyncHandler(async (req, res) => {
       const updatedProduct = await productModel.decrementStock(
         productId,
         variantId,
-        quantity
+        quantity,
       );
 
       if (!updatedProduct) {
         throw new ApiError(
           400,
-          `Insufficient stock or invalid variant for product ID: ${productId}`
+          `Insufficient stock or invalid variant for product ID: ${productId}`,
         );
       }
 
@@ -99,3 +99,63 @@ export const createOrder = asyncHandler(async (req, res) => {
   }
 });
 
+export const getOrdersByUser = asyncHandler(async (req, res) => {
+  const orders = await orderModel
+    .find({ user: req.user._id })
+    .sort({ createdAt: -1 })
+    .populate("items.product", "name slug images");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, orders, "Orders retrieved successfully"));
+});
+
+export const getOrderById = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new ApiError(400, "Invalid order ID");
+  }
+
+  const order = await orderModel.findOne({
+    _id: orderId,
+    user: req.user._id,
+  });
+
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, order, "Order retrieved successfully"));
+});
+
+export const cancelOrder = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const { reason } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    throw new ApiError(400, "Invalid order ID");
+  }
+
+  const order = await orderModel.findOne({
+    _id: orderId,
+    user: req.user._id,
+  });
+
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  if (!order.isCancellable) {
+    throw new ApiError(400, "Order cannot be cancelled at this stage");
+  }
+
+  order.advanceStatus("CANCELLED", reason || "Cancelled by user", req.user._id);
+  await order.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, order, "Order cancelled successfully"));
+});
