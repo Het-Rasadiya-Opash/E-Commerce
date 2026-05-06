@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import orderModel from "../models/order.model.js";
 import productModel from "../models/product.mode.js";
 import mongoose from "mongoose";
+import { emitToUser } from "../socket.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
   const {
@@ -162,7 +163,6 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   order.advanceStatus("CANCELLED", reason || "Cancelled by user", req.user._id);
   await order.save();
 
-  // Restore stock
   for (const item of order.items) {
     await productModel.incrementStock(
       item.product,
@@ -170,6 +170,8 @@ export const cancelOrder = asyncHandler(async (req, res) => {
       item.quantity,
     );
   }
+
+  emitToUser(order.user, "orderStatusUpdated", order);
 
   return res
     .status(200)
@@ -260,6 +262,8 @@ export const updateOrderStatusByAdmin = asyncHandler(async (req, res) => {
   );
 
   await order.save();
+
+  emitToUser(order.user, "orderStatusUpdated", order);
 
   return res
     .status(200)

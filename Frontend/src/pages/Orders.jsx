@@ -26,6 +26,8 @@ import {
   Tag,
 } from "lucide-react";
 import { Link } from "react-router";
+import { socket, connectSocket, disconnectSocket } from "../utils/socket";
+import { toast } from "react-toastify";
 
 const StatusBadge = ({ status }) => {
   const statusStyles = {
@@ -53,6 +55,138 @@ const StatusBadge = ({ status }) => {
       {statusIcons[status]}
       {status}
     </span>
+  );
+};
+
+const StatusTimeline = ({ timeline = [], currentStatus }) => {
+  const steps = [
+    { status: "PLACED", label: "Placed", icon: Package },
+    { status: "PAID", label: "Paid", icon: CreditCard },
+    { status: "SHIPPED", label: "Shipped", icon: Truck },
+    { status: "DELIVERED", label: "Delivered", icon: CheckCircle2 },
+  ];
+
+  const currentStepIndex = steps.findIndex((s) => s.status === currentStatus);
+  const isCancelled = currentStatus === "CANCELLED";
+
+  return (
+    <div className="mb-12">
+      <div className="flex items-center gap-3 mb-10">
+        <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 border border-indigo-100/50">
+          <Clock size={20} />
+        </div>
+        <div>
+          <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-none mb-1.5">
+            Order Journey
+          </h4>
+          <p className="text-sm font-bold text-slate-900">
+            {isCancelled ? (
+              <span className="text-rose-600">This order was cancelled</span>
+            ) : (
+              <span>
+                Current Status:{" "}
+                <span className="text-indigo-600">{currentStatus}</span>
+              </span>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="relative px-2">
+        <div className="absolute top-5 left-0 w-full h-[3px] bg-slate-100 rounded-full"></div>
+
+        {!isCancelled && currentStepIndex !== -1 && (
+          <div
+            className="absolute top-5 left-0 h-[3px] bg-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(79,70,229,0.4)]"
+            style={{
+              width: `${(currentStepIndex / (steps.length - 1)) * 100}%`,
+            }}
+          ></div>
+        )}
+
+        <div className="flex justify-between relative">
+          {steps.map((step, index) => {
+            const event = timeline?.find((e) => e.status === step.status);
+            const isCompleted =
+              !!event || (currentStepIndex >= index && !isCancelled);
+            const isCurrent = currentStatus === step.status;
+            const Icon = step.icon;
+
+            return (
+              <div
+                key={step.status}
+                className="flex flex-col items-center group relative"
+              >
+                <div
+                  className={`w-11 h-11 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 relative z-10 ${
+                    isCurrent
+                      ? "bg-indigo-600 border-indigo-600 text-white shadow-2xl shadow-indigo-200 scale-110"
+                      : isCompleted
+                        ? "bg-white border-indigo-600 text-indigo-600 shadow-lg shadow-indigo-100/50"
+                        : "bg-white border-slate-100 text-slate-300"
+                  }`}
+                >
+                  <Icon size={20} />
+                </div>
+
+                <div className="mt-4 flex flex-col items-center absolute top-10 w-32">
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                      isCurrent
+                        ? "text-indigo-600"
+                        : isCompleted
+                          ? "text-slate-900"
+                          : "text-slate-400"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                  {event && (
+                    <span className="text-[9px] text-slate-400 font-bold mt-1 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">
+                      {new Date(event.timestamp).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                      })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {isCancelled && (
+          <div className="mt-20 p-5 bg-rose-50/50 border border-rose-100/50 rounded-2xl flex items-center gap-5 animate-in fade-in zoom-in duration-700">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-rose-600 shadow-sm border border-rose-100">
+              <XCircle size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-rose-400 uppercase tracking-[0.2em] mb-1">
+                Cancellation Update
+              </p>
+              <p className="text-sm font-bold text-rose-900 leading-tight">
+                Order was cancelled on{" "}
+                {new Date(
+                  timeline.find((e) => e.status === "CANCELLED")?.timestamp ||
+                    Date.now(),
+                ).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+              {timeline.find((e) => e.status === "CANCELLED")?.note && (
+                <p className="text-xs text-rose-500 font-medium mt-1">
+                  Reason: {timeline.find((e) => e.status === "CANCELLED")?.note}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="h-10"></div>
+    </div>
   );
 };
 
@@ -125,8 +259,10 @@ const OrderCard = ({ order, onCancel }) => {
       </div>
 
       {isExpanded && (
-        <div className="px-6 pb-8 sm:px-8 border-t border-slate-50 pt-8 animate-in fade-in slide-in-from-top duration-300">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="px-6 pb-8 sm:px-8 border-t border-slate-50 pt-10 animate-in fade-in slide-in-from-top duration-500">
+          <StatusTimeline timeline={order.statusTimeline} currentStatus={order.status} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-6">
             {/* Items List */}
             <div className="lg:col-span-7 space-y-6">
               <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
@@ -285,6 +421,7 @@ const OrderCard = ({ order, onCancel }) => {
 const Orders = () => {
   const dispatch = useDispatch();
   const { orders, loading, error } = useSelector((state) => state.orders);
+  const { currentUser } = useSelector((state) => state.users);
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchUserOrders = async () => {
@@ -314,7 +451,27 @@ const Orders = () => {
 
   useEffect(() => {
     fetchUserOrders();
-  }, []);
+
+    if (currentUser?._id) {
+      connectSocket(currentUser._id);
+
+      socket.on("orderStatusUpdated", (updatedOrder) => {
+        dispatch(updateOrder(updatedOrder));
+        toast.info(
+          `Order ${updatedOrder.orderNumber} status updated to ${updatedOrder.status}`,
+          {
+            icon: <Package className="text-indigo-600" />,
+            className: "rounded-2xl border-indigo-100 font-bold",
+          },
+        );
+      });
+    }
+
+    return () => {
+      socket.off("orderStatusUpdated");
+      disconnectSocket();
+    };
+  }, [currentUser?._id]);
 
   const filteredOrders = orders.filter(
     (order) =>
