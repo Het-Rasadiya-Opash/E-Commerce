@@ -161,7 +161,12 @@ productSchema.methods.getVariant = function (variantId) {
   return this.variants.id(variantId);
 };
 
-productSchema.statics.decrementStock = function (productId, variantId, qty) {
+productSchema.statics.decrementStock = function (
+  productId,
+  variantId,
+  qty,
+  options = {},
+) {
   return this.findOneAndUpdate(
     {
       _id: productId,
@@ -178,7 +183,7 @@ productSchema.statics.decrementStock = function (productId, variantId, qty) {
         totalStock: -qty,
       },
     },
-    { new: true },
+    { returnDocument: "after", ...options },
   );
 };
 

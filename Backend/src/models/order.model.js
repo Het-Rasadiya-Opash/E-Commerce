@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema(
   {
@@ -140,9 +140,9 @@ const paymentSchema = new mongoose.Schema(
       enum: ["PENDING", "PAID", "FAILED", "REFUNDED"],
       default: "PENDING",
     },
-    transactionId: {
-      type: String,
-      default: null,
+    isPaid: {
+      type: Boolean,
+      default: false,
     },
     paidAt: {
       type: Date,
@@ -162,7 +162,10 @@ const paymentSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
-    orderNumber: { type: String, unique: true },
+    orderNumber: {
+      type: String,
+      unique: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -248,13 +251,12 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-orderSchema.pre("save", async function (next) {
+orderSchema.pre("save", async function () {
   if (!this.orderNumber) {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     const count = await mongoose.model("Order").countDocuments();
     this.orderNumber = `ORD-${date}-${String(count + 1).padStart(5, "0")}`;
   }
-  next();
 });
 
 orderSchema.methods.advanceStatus = function (newStatus, note, updatedBy) {
@@ -275,4 +277,4 @@ orderSchema.virtual("isCancellable").get(function () {
 
 const orderModel = mongoose.model("Order", orderSchema);
 
-export const orderModel;
+export default orderModel;
