@@ -20,6 +20,7 @@ import Success from "./pages/Success";
 import Orders from "./pages/Orders";
 import AllOrdersShow from "./pages/AllOrdersShow";
 import Profile from "./pages/Profile";
+import FlashSales from "./pages/FlashSales";
 
 const App = () => {
   const location = useLocation();
@@ -57,6 +58,7 @@ const App = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/orders" element={<Orders />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/flash-sales" element={<FlashSales />} />
           </Route>
 
           <Route path="/product/:productId" element={<ProductDetail />} />

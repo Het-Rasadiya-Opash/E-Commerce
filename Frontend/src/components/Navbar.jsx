@@ -78,17 +78,12 @@ const Navbar = () => {
             >
               Categories
             </Link>
+
             <Link
-              to="/deals"
+              to="/flash-sales"
               className="text-slate-600 hover:text-indigo-600 font-medium transition-colors"
             >
-              Deals
-            </Link>
-            <Link
-              to="/new-arrivals"
-              className="text-slate-600 hover:text-indigo-600 font-medium transition-colors"
-            >
-              New Arrivals
+              Flash Sales
             </Link>
           </div>
 
@@ -224,19 +219,13 @@ const Navbar = () => {
             >
               Categories
             </Link>
+
             <Link
-              to="/deals"
+              to="/flash-sales"
               onClick={() => setIsMenuOpen(false)}
               className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
             >
-              Deals
-            </Link>
-            <Link
-              to="/new-arrivals"
-              onClick={() => setIsMenuOpen(false)}
-              className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-            >
-              New Arrivals
+              Flash Sales
             </Link>
             {!currentUser && (
               <div className="pt-4 grid grid-cols-2 gap-4">
