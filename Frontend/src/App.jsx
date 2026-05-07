@@ -19,6 +19,7 @@ import CartDrawer from "./components/CartDrawer";
 import Success from "./pages/Success";
 import Orders from "./pages/Orders";
 import AllOrdersShow from "./pages/AllOrdersShow";
+import Profile from "./pages/Profile";
 
 const App = () => {
   const location = useLocation();
@@ -53,7 +54,10 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/orders" element={<Orders />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
 
           <Route path="/product/:productId" element={<ProductDetail />} />
           <Route path="/categories" element={<Categories />} />
@@ -63,7 +67,10 @@ const App = () => {
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/add-product" element={<AddProduct />} />
-            <Route path="/orders/admin/all-orders" element={<AllOrdersShow />} />
+            <Route
+              path="/orders/admin/all-orders"
+              element={<AllOrdersShow />}
+            />
           </Route>
         </Routes>
       </main>
