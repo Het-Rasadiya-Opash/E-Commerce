@@ -170,13 +170,6 @@ const Navbar = () => {
                             <Package className="w-4 h-4" />
                             <span>Orders</span>
                           </Link>
-                          <Link
-                            to="/wishlist"
-                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                          >
-                            <Heart className="w-4 h-4" />
-                            <span>Wishlist</span>
-                          </Link>
                         </>
                       )}
                       <div className="my-1 border-t border-slate-100"></div>
