@@ -87,7 +87,7 @@ const flashSaleSchema = new mongoose.Schema(
     },
     waitingRoomCapacity: {
       type: Number,
-      default: 500,
+      default: 100,
     },
     status: {
       type: String,
@@ -139,7 +139,7 @@ flashSaleSchema.statics.decrementUnits = function (saleId, qty = 1) {
   return this.findOneAndUpdate(
     {
       _id: saleId,
-      status: "active",
+      status: "ACTIVE",
       unitsSold: { $lte: this.maxUnits - qty },
     },
     {
