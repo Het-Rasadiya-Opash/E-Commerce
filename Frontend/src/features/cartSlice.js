@@ -95,11 +95,16 @@ const cartSlice = createSlice({
 
       if (itemIndex >= 0) {
         state.cartItems[itemIndex].cartQuantity += quantity;
+        // Keep the lowest price if same item is added again
+        if (action.payload.flashSalePrice) {
+          state.cartItems[itemIndex].flashSalePrice = action.payload.flashSalePrice;
+        }
       } else {
         const tempProduct = {
           product,
           selectedVariant,
           cartQuantity: quantity,
+          flashSalePrice: action.payload.flashSalePrice || null,
         };
         state.cartItems.push(tempProduct);
       }
@@ -152,9 +157,9 @@ const cartSlice = createSlice({
       let { total, quantity } = state.cartItems.reduce(
         (cartTotal, cartItem) => {
           const { product, selectedVariant, cartQuantity } = cartItem;
-          const itemTotal =
-            (selectedVariant ? selectedVariant.price : product.basePrice) *
-            cartQuantity;
+          const basePrice = selectedVariant ? selectedVariant.price : product.basePrice;
+          const priceToUse = cartItem.flashSalePrice || basePrice;
+          const itemTotal = priceToUse * cartQuantity;
 
           cartTotal.total += itemTotal;
           cartTotal.quantity += cartQuantity;

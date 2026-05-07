@@ -137,8 +137,20 @@ const CartDrawer = () => {
                             {cartItem.selectedVariant.size}
                           </div>
                         )}
-                        <div className="text-sm font-black text-slate-900">
-                          ₹{itemPrice}
+                        <div className="flex flex-col">
+                          {cartItem.flashSalePrice && (
+                            <span className="text-[10px] text-slate-400 line-through font-bold">
+                              ₹{itemPrice}
+                            </span>
+                          )}
+                          <div className="text-sm font-black text-slate-900 flex items-center gap-2">
+                            ₹{cartItem.flashSalePrice || itemPrice}
+                            {cartItem.flashSalePrice && (
+                              <span className="text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded-md uppercase tracking-wider font-black">
+                                Deal
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 

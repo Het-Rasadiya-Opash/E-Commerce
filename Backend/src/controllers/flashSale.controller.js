@@ -77,3 +77,40 @@ export const createFlashSale = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, flashSale, "Flash sale created successfully"));
 });
+
+export const getFlashSales = asyncHandler(async (req, res) => {
+  const { status } = req.query;
+  const filter = { isDeleted: false };
+
+  if (status) {
+    filter.status = status.toUpperCase();
+  }
+
+  const flashSales = await flashSaleModel
+    .find(filter)
+    .populate("product", "name basePrice images variants")
+    .sort({ startTime: -1 });
+
+  const flashSalesWithVariantDetails = flashSales.map((sale) => {
+    const saleObj = sale.toObject();
+    if (saleObj.product && saleObj.variant) {
+      const variantDetail = saleObj.product.variants?.find(
+        (v) => v._id.toString() === saleObj.variant.toString(),
+      );
+      saleObj.variantDetail = variantDetail || null;
+    } else {
+      saleObj.variantDetail = null;
+    }
+    return saleObj;
+  });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        flashSalesWithVariantDetails,
+        "Flash sales retrieved successfully",
+      ),
+    );
+});

@@ -76,9 +76,9 @@ const Cart = () => {
         productId: item.product._id,
         variantId: item.selectedVariant?._id,
         quantity: item.cartQuantity,
-        price: item.selectedVariant
+        price: item.flashSalePrice || (item.selectedVariant
           ? item.selectedVariant.price
-          : item.product.basePrice,
+          : item.product.basePrice),
       })),
       shippingAddress,
       paymentMethod,
@@ -209,9 +209,21 @@ const Cart = () => {
                       >
                         {cartItem.product.name}
                       </Link>
-                      <span className="text-xl font-black text-slate-900">
-                        ₹{itemPrice * cartItem.cartQuantity}
-                      </span>
+                      <div className="flex flex-col items-end">
+                        {cartItem.flashSalePrice && (
+                          <span className="text-xs text-slate-400 line-through font-bold">
+                            ₹{itemPrice * cartItem.cartQuantity}
+                          </span>
+                        )}
+                        <span className="text-xl font-black text-slate-900 flex items-center gap-2">
+                          ₹{(cartItem.flashSalePrice || itemPrice) * cartItem.cartQuantity}
+                          {cartItem.flashSalePrice && (
+                            <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-1 rounded-lg uppercase tracking-widest font-black border border-rose-100">
+                              Flash Deal
+                            </span>
+                          )}
+                        </span>
+                      </div>
                     </div>
 
                     {(cartItem.selectedVariant || cartItem.product.brand) && (
