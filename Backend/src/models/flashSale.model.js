@@ -106,6 +106,11 @@ const flashSaleSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    analytics: {
+      totalAttempts: { type: Number, default: 0 },
+      totalOrders: { type: Number, default: 0 },
+      revenue: { type: Number, default: 0 },
+    },
   },
   {
     timestamps: true,
@@ -136,16 +141,23 @@ flashSaleSchema.virtual("isLive").get(function () {
 });
 
 flashSaleSchema.statics.decrementUnits = function (saleId, qty = 1) {
+  const quantity = Number(qty) || 1;
   return this.findOneAndUpdate(
     {
       _id: saleId,
       status: "ACTIVE",
-      unitsSold: { $lte: this.maxUnits - qty },
+      $expr: {
+        $lte: [{ $add: ["$unitsSold", quantity] }, "$maxUnits"],
+      },
     },
     {
-      $inc: { unitsSold: qty, "analytics.totalAttempts": 1 },
+      $inc: {
+        unitsSold: quantity,
+        "analytics.totalAttempts": 1,
+        "analytics.totalOrders": 1,
+      },
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 };
 

@@ -89,6 +89,7 @@ const FlashSaleCard = ({ sale }) => {
         selectedVariant: finalVariant,
         quantity: 1,
         flashSalePrice: discountedPrice,
+        flashSaleId: sale._id,
       }),
     );
     dispatch(openCart());

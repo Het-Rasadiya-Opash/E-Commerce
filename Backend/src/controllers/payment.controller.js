@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import Stripe from "stripe";
 import productModel from "../models/product.mode.js";
 import orderModel from "../models/order.model.js";
+import flashSaleModel from "../models/flashSale.model.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -40,6 +41,7 @@ export const createPayment = asyncHandler(async (req, res) => {
           metadata: {
             productId: item.product._id.toString(),
             variantId: item.selectedVariant?._id?.toString() || "",
+            flashSaleId: item.flashSaleId?.toString() || "",
           },
         },
         unit_amount: Math.round(price * 100),
@@ -141,6 +143,25 @@ export const verifySession = asyncHandler(async (req, res) => {
 
     const variant = variantId ? updatedProduct.variants.id(variantId) : null;
 
+    const { flashSaleId } = stripeProduct.metadata;
+    if (flashSaleId) {
+      const updatedFlashSale = await flashSaleModel.decrementUnits(
+        flashSaleId,
+        item.quantity,
+      );
+
+      if (!updatedFlashSale) {
+        console.error(
+          `Flash sale sold out after payment for session: ${sessionId}`,
+        );
+      }
+
+      await flashSaleModel.updateOne(
+        { _id: flashSaleId, "participants.user": userId },
+        { $set: { "participants.$.hasOrdered": true } },
+      );
+    }
+
     processedItems.push({
       product: productId,
       variant: variantId || null,
@@ -152,6 +173,8 @@ export const verifySession = asyncHandler(async (req, res) => {
         image: variant?.images?.[0] || updatedProduct.images?.[0] || "",
         originalPrice: variant?.price || updatedProduct.basePrice,
         paidPrice: item.price.unit_amount / 100,
+        isFlashSale: !!flashSaleId,
+        flashSaleId: flashSaleId || null,
       },
       quantity: item.quantity,
       lineTotal: (item.price.unit_amount / 100) * item.quantity,

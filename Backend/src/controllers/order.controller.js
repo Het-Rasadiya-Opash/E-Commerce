@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import orderModel from "../models/order.model.js";
 import productModel from "../models/product.mode.js";
+import flashSaleModel from "../models/flashSale.model.js";
 import mongoose from "mongoose";
 import { emitToUser } from "../socket.js";
 
@@ -17,6 +18,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     shippingFee,
     grandTotal,
     notes,
+    flashSaleId, 
   } = req.body;
 
   if (!items || items.length === 0) {
@@ -31,7 +33,34 @@ export const createOrder = asyncHandler(async (req, res) => {
     const processedItems = [];
 
     for (const item of items) {
-      const { productId, variantId, quantity, price } = item;
+      const {
+        productId,
+        variantId,
+        quantity,
+        price,
+        flashSaleId: itemFlashSaleId,
+      } = item;
+
+      const targetFlashSaleId = itemFlashSaleId || flashSaleId;
+
+      if (targetFlashSaleId) {
+        const updatedFlashSale = await flashSaleModel.decrementUnits(
+          targetFlashSaleId,
+          quantity,
+        );
+
+        if (!updatedFlashSale) {
+          throw new ApiError(
+            400,
+            "Flash sale is either inactive or sold out for this product.",
+          );
+        }
+
+        await flashSaleModel.updateOne(
+          { _id: targetFlashSaleId, "participants.user": req.user._id },
+          { $set: { "participants.$.hasOrdered": true } },
+        );
+      }
 
       const updatedProduct = await productModel.decrementStock(
         productId,
@@ -62,6 +91,8 @@ export const createOrder = asyncHandler(async (req, res) => {
           image: variant.images?.[0] || updatedProduct.images?.[0] || "",
           originalPrice: variant.price || updatedProduct.basePrice,
           paidPrice: price,
+          isFlashSale: !!targetFlashSaleId,
+          flashSaleId: targetFlashSaleId || null,
         },
         quantity,
         lineTotal: price * quantity,
@@ -82,6 +113,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       shippingFee: shippingFee || 0,
       grandTotal,
       notes,
+      flashSale: flashSaleId || null,
       statusTimeline: [
         {
           status: "PLACED",

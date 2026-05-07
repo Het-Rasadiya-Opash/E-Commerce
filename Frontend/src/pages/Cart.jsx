@@ -79,6 +79,7 @@ const Cart = () => {
         price: item.flashSalePrice || (item.selectedVariant
           ? item.selectedVariant.price
           : item.product.basePrice),
+        flashSaleId: item.flashSaleId || null,
       })),
       shippingAddress,
       paymentMethod,

@@ -105,6 +105,7 @@ const cartSlice = createSlice({
           selectedVariant,
           cartQuantity: quantity,
           flashSalePrice: action.payload.flashSalePrice || null,
+          flashSaleId: action.payload.flashSaleId || null,
         };
         state.cartItems.push(tempProduct);
       }
@@ -157,12 +158,13 @@ const cartSlice = createSlice({
       let { total, quantity } = state.cartItems.reduce(
         (cartTotal, cartItem) => {
           const { product, selectedVariant, cartQuantity } = cartItem;
-          const basePrice = selectedVariant ? selectedVariant.price : product.basePrice;
-          const priceToUse = cartItem.flashSalePrice || basePrice;
-          const itemTotal = priceToUse * cartQuantity;
+          const basePrice = Number(selectedVariant ? selectedVariant.price : product.basePrice) || 0;
+          const priceToUse = Number(cartItem.flashSalePrice || basePrice) || 0;
+          const quantity = Number(cartQuantity) || 0;
+          const itemTotal = priceToUse * quantity;
 
           cartTotal.total += itemTotal;
-          cartTotal.quantity += cartQuantity;
+          cartTotal.quantity += quantity;
 
           return cartTotal;
         },
