@@ -270,3 +270,138 @@ export const getAllCategories = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, categories, "Categories fetched successfully"));
 });
+
+export const editProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    description,
+    category,
+    subCategory,
+    brand,
+    basePrice,
+    variants,
+    tags,
+    existingImages,
+  } = req.body;
+
+  const product = await productModel.findById(id);
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  if (product.createdBy.toString() !== req.user?._id.toString()) {
+    throw new ApiError(403, "You are not authorized to edit this product");
+  }
+
+  if (req.files && Array.isArray(req.files)) {
+    const filesObject = {};
+    req.files.forEach((file) => {
+      const fieldname = file.fieldname.trim();
+      if (!filesObject[fieldname]) {
+        filesObject[fieldname] = [];
+      }
+      filesObject[fieldname].push(file);
+    });
+    req.files = filesObject;
+  }
+
+  let imageUrls = [];
+
+  if (existingImages) {
+    try {
+      imageUrls =
+        typeof existingImages === "string"
+          ? JSON.parse(existingImages)
+          : existingImages;
+    } catch (error) {
+      imageUrls = Array.isArray(existingImages)
+        ? existingImages
+        : [existingImages];
+    }
+  } else {
+    imageUrls = product.images || [];
+  }
+
+  let imageLocalPaths = [];
+  if (req.files && Array.isArray(req.files.images)) {
+    imageLocalPaths = req.files.images.map((file) => file.path);
+  } else if (req.files && req.files.image) {
+    imageLocalPaths = [req.files.image[0].path];
+  }
+
+  if (imageLocalPaths.length > 0) {
+    for (const localPath of imageLocalPaths) {
+      const uploadedImage = await uploadOnCloudinary(localPath);
+      if (uploadedImage) {
+        imageUrls.push(uploadedImage.secure_url || uploadedImage.url);
+      }
+    }
+  }
+
+  let parsedVariants = variants;
+  if (typeof variants === "string") {
+    try {
+      parsedVariants = JSON.parse(variants);
+    } catch (error) {
+      throw new ApiError(
+        400,
+        "Invalid format for variants. Expected a JSON array.",
+      );
+    }
+  }
+
+  if (parsedVariants && Array.isArray(parsedVariants)) {
+    const variantProcessingPromises = parsedVariants.map(async (variant, i) => {
+      const variantImageKey = `variant_${i}_images`;
+
+      if (req.files && req.files[variantImageKey]) {
+        const files = req.files[variantImageKey];
+        const uploadPromises = files.map((file) =>
+          uploadOnCloudinary(file.path),
+        );
+        const uploadResults = await Promise.all(uploadPromises);
+
+        const newUrls = uploadResults
+          .filter((result) => result !== null)
+          .map((result) => result.secure_url || result.url);
+
+        const existingVariantImages = variant.images || [];
+        return { ...variant, images: [...existingVariantImages, ...newUrls] };
+      }
+      return variant;
+    });
+
+    parsedVariants = await Promise.all(variantProcessingPromises);
+  }
+
+  let parsedTags = tags;
+  if (typeof tags === "string") {
+    try {
+      parsedTags = JSON.parse(tags);
+    } catch (error) {
+      parsedTags = tags.split(",").map((tag) => tag.trim());
+    }
+  }
+
+  if (name) product.name = name;
+  if (description) product.description = description;
+  if (category) product.category = category;
+  if (subCategory !== undefined) product.subCategory = subCategory;
+  if (brand !== undefined) product.brand = brand;
+  if (basePrice) product.basePrice = Number(basePrice);
+  if (parsedVariants) product.variants = parsedVariants;
+  if (parsedTags) product.tags = parsedTags;
+  product.images = imageUrls;
+
+  const updatedProduct = await product.save();
+
+  if (!updatedProduct) {
+    throw new ApiError(500, "Something went wrong while updating the product");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedProduct, "Product updated successfully"));
+});

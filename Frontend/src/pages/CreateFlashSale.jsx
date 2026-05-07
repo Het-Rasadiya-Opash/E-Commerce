@@ -63,6 +63,15 @@ const CreateFlashSale = () => {
     e.preventDefault();
     setLoading(true);
 
+    const availableStock = getAvailableStock();
+    if (Number(formData.maxUnits) > availableStock) {
+      toast.error(
+        `Max units (${formData.maxUnits}) cannot exceed available stock (${availableStock})`,
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await apiRequest.post("/flash-sales/create", formData);
       toast.success(
@@ -90,6 +99,17 @@ const CreateFlashSale = () => {
     return selectedProduct.basePrice;
   };
 
+  const getAvailableStock = () => {
+    if (!selectedProduct) return 0;
+    if (formData.variant) {
+      const variant = selectedProduct.variants?.find(
+        (v) => v._id === formData.variant,
+      );
+      return variant?.stock || 0;
+    }
+    return selectedProduct.totalStock || 0;
+  };
+
   if (fetchingProducts) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -113,12 +133,10 @@ const CreateFlashSale = () => {
         <div className="bg-indigo-600 px-8 py-10 text-white relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-2">
-              <Zap className="w-8 h-8 fill-yellow-400 text-yellow-400" />
+              <Zap className="w-8 h-8" />
               <h1 className="text-3xl font-bold">Create Flash Sale</h1>
             </div>
-            <p className="text-indigo-100 text-lg">
-              Set up a high-energy, limited-time discount event.
-            </p>
+            
           </div>
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-indigo-400/20 rounded-full blur-2xl"></div>
@@ -252,13 +270,20 @@ const CreateFlashSale = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">
-                  Max Units for Sale
+                <label className="text-sm font-bold text-gray-700 uppercase tracking-wider flex justify-between">
+                  <span>Max Units for Sale</span>
+                  {selectedProduct && (
+                    <span className="text-indigo-600 normal-case font-medium">
+                      Available: {getAvailableStock()}
+                    </span>
+                  )}
                 </label>
                 <input
                   type="number"
                   name="maxUnits"
                   required
+                  min="1"
+                  max={getAvailableStock()}
                   value={formData.maxUnits}
                   onChange={handleInputChange}
                   placeholder="e.g., 50"

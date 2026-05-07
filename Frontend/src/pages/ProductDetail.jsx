@@ -426,9 +426,7 @@ const ProductDetail = () => {
             {activeTab === "reviews" && (
               <div className="animate-in fade-in">
                 {product.reviews && product.reviews.length > 0 ? (
-                  <div className="space-y-8">
-                    {/* Review items would go here */}
-                  </div>
+                  <div className="space-y-8"></div>
                 ) : (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">

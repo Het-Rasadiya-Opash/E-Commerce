@@ -518,7 +518,6 @@ const AllOrdersShow = () => {
 
             <div className="flex-1 overflow-y-auto p-6 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Customer Info */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                     <User size={16} className="text-indigo-500" />

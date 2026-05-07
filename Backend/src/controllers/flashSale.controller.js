@@ -34,15 +34,24 @@ export const createFlashSale = asyncHandler(async (req, res) => {
   }
 
   let originalPrice = productData.basePrice;
+  let availableStock = productData.totalStock;
 
   if (variant) {
     const variantData = productData.variants.id(variant);
     if (!variantData) {
       throw new ApiError(404, "Product variant not found");
     }
+    availableStock = variantData.stock;
     if (variantData.price) {
       originalPrice = variantData.price;
     }
+  }
+
+  if (maxUnits > availableStock) {
+    throw new ApiError(
+      400,
+      `Flash sale max units (${maxUnits}) cannot exceed available stock (${availableStock})`,
+    );
   }
 
   if (discountedPrice >= originalPrice) {
@@ -117,7 +126,16 @@ export const getFlashSales = asyncHandler(async (req, res) => {
       const variantDetail = saleObj.product.variants?.find(
         (v) => v._id.toString() === saleObj.variant.toString(),
       );
-      saleObj.variantDetail = variantDetail || null;
+      if (variantDetail) {
+        saleObj.variantDetail = {
+          ...variantDetail,
+          // Adding type and value as convenience fields for frontend
+          type: variantDetail.color ? "Color" : variantDetail.size ? "Size" : "Variant",
+          value: variantDetail.color || variantDetail.size || "Selected",
+        };
+      } else {
+        saleObj.variantDetail = null;
+      }
     } else {
       saleObj.variantDetail = null;
     }

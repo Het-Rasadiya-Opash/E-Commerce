@@ -95,7 +95,6 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime }) => {
   const start = +new Date(startTime);
   const end = +new Date(endTime);
 
-  // Live status derivation for instant UI response
   const isLiveActive =
     (status === "ACTIVE" || (status === "SCHEDULED" && now >= start)) &&
     now < end;
@@ -434,10 +433,7 @@ const FlashSales = () => {
             <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">
               No Active Drops
             </h2>
-            <p className="text-slate-500 font-medium max-w-xs mx-auto">
-              All our flash sales have ended. Sign up for notifications to catch
-              the next one!
-            </p>
+            
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-10">

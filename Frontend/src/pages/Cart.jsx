@@ -97,7 +97,6 @@ const Cart = () => {
         navigate("/orders");
       }
     } else {
-      // For CARD, we pass everything to checkout and handle order creation on success
       dispatch(checkout({ cartItems: cart.cartItems, orderData }));
     }
   };
@@ -275,7 +274,6 @@ const Cart = () => {
               );
             })}
 
-            {/* Shipping Address Form */}
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-100 transition-all hover:border-indigo-100">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-indigo-50 p-2 rounded-xl text-indigo-600">

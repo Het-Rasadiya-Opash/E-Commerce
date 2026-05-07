@@ -95,7 +95,6 @@ const cartSlice = createSlice({
 
       if (itemIndex >= 0) {
         state.cartItems[itemIndex].cartQuantity += quantity;
-        // Keep the lowest price if same item is added again
         if (action.payload.flashSalePrice) {
           state.cartItems[itemIndex].flashSalePrice = action.payload.flashSalePrice;
         }

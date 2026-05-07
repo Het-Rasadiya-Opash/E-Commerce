@@ -9,6 +9,7 @@ import {
   getProductsByUser,
   deleteProduct,
   getAllCategories,
+  editProduct,
 } from "../controllers/product.controller.js";
 
 const router = express.Router();
@@ -28,6 +29,14 @@ router.post(
   authorizeRole("ADMIN"),
   upload.any(),
   createProduct,
+);
+
+router.patch(
+  "/:id",
+  authMiddleware,
+  authorizeRole("ADMIN"),
+  upload.any(),
+  editProduct,
 );
 
 export default router;

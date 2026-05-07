@@ -263,7 +263,6 @@ const OrderCard = ({ order, onCancel }) => {
           <StatusTimeline timeline={order.statusTimeline} currentStatus={order.status} />
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-6">
-            {/* Items List */}
             <div className="lg:col-span-7 space-y-6">
               <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
                 Order Items
@@ -324,7 +323,6 @@ const OrderCard = ({ order, onCancel }) => {
               </div>
             </div>
 
-            {/* Sidebar Details */}
             <div className="lg:col-span-5 space-y-8">
               <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
                 <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-4">
