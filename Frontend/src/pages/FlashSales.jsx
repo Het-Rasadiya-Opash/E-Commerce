@@ -80,6 +80,16 @@ const FlashSaleCard = ({ sale }) => {
   const showAllVariants = !activeVariant;
 
   const handleAddToCart = (selectedVariant = null) => {
+    if (isSoldOut) {
+      toast.error("This flash sale is sold out!");
+      return;
+    }
+
+    if (!isActive) {
+      toast.error("This flash sale is not active yet!");
+      return;
+    }
+
     const finalVariant =
       selectedVariant || activeVariant || product?.variants?.[0];
 
@@ -197,10 +207,21 @@ const FlashSaleCard = ({ sale }) => {
               {product.variants.slice(0, 4).map((v) => (
                 <button
                   key={v._id}
+                  disabled={!isActive || isSoldOut}
                   onClick={() => handleAddToCart(v)}
-                  className="px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[11px] font-bold hover:border-indigo-600 hover:bg-white transition-all flex flex-col items-start gap-0.5 group/v"
+                  className={`px-3 py-2 border rounded-xl text-[11px] font-bold transition-all flex flex-col items-start gap-0.5 group/v ${
+                    isActive && !isSoldOut
+                      ? "bg-slate-50 border-slate-100 hover:border-indigo-600 hover:bg-white"
+                      : "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
+                  }`}
                 >
-                  <span className="text-slate-900 group-hover/v:text-indigo-600">
+                  <span
+                    className={
+                      isActive && !isSoldOut
+                        ? "text-slate-900 group-hover/v:text-indigo-600"
+                        : "text-slate-400"
+                    }
+                  >
                     {v.color}
                   </span>
                   <span className="text-[9px] text-slate-400">
