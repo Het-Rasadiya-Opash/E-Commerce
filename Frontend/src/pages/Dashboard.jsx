@@ -7,6 +7,7 @@ import {
   Edit,
   ExternalLink,
   Search,
+  Zap,
 } from "lucide-react";
 import { Link } from "react-router";
 import { toast } from "react-toastify";
@@ -69,13 +70,23 @@ const Dashboard = () => {
             Admin Dashboard
           </h1>
         </div>
-        <Link
-          to="/add-product"
-          className="inline-flex items-center px-5 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add New Product
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/add-product"
+            className="inline-flex items-center px-5 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add New Product
+          </Link>
+
+          <Link
+            to="/create-flash-sale"
+            className="inline-flex items-center px-5 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+          >
+            <Zap className="w-5 h-5 mr-2 fill-yellow-400 text-yellow-400" />
+            Create Flash Sale
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

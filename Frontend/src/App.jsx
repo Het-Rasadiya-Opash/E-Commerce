@@ -21,6 +21,7 @@ import Orders from "./pages/Orders";
 import AllOrdersShow from "./pages/AllOrdersShow";
 import Profile from "./pages/Profile";
 import FlashSales from "./pages/FlashSales";
+import CreateFlashSale from "./pages/CreateFlashSale";
 
 const App = () => {
   const location = useLocation();
@@ -69,6 +70,7 @@ const App = () => {
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/add-product" element={<AddProduct />} />
+            <Route path="/create-flash-sale" element={<CreateFlashSale />} />
             <Route
               path="/orders/admin/all-orders"
               element={<AllOrdersShow />}

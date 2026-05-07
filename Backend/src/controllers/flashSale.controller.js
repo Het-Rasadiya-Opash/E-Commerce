@@ -82,6 +82,26 @@ export const getFlashSales = asyncHandler(async (req, res) => {
   const { status } = req.query;
   const filter = { isDeleted: false };
 
+  const now = new Date();
+
+  await flashSaleModel.updateMany(
+    {
+      status: "SCHEDULED",
+      startTime: { $lte: now },
+      isDeleted: false,
+    },
+    { $set: { status: "ACTIVE" } },
+  );
+
+  await flashSaleModel.updateMany(
+    {
+      status: "ACTIVE",
+      endTime: { $lte: now },
+      isDeleted: false,
+    },
+    { $set: { status: "ENDED" } },
+  );
+
   if (status) {
     filter.status = status.toUpperCase();
   }

@@ -12,18 +12,33 @@ import {
   Info,
 } from "lucide-react";
 import apiRequest from "../utils/apiRequest";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart, openCart } from "../features/cartSlice";
 import { toast } from "react-toastify";
 import { Link } from "react-router";
+import { socket, connectSocket } from "../utils/socket";
 
-const CountdownTimer = ({ endTime }) => {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+const CountdownTimer = ({ startTime, endTime, currentTime }) => {
+  const calculateTimeLeft = () => {
+    const now = +currentTime;
+    const start = +new Date(startTime);
+    const end = +new Date(endTime);
 
-  function calculateTimeLeft() {
-    const difference = +new Date(endTime) - +new Date();
+    let difference;
+    let label;
+
+    if (now < start) {
+      difference = start - now;
+      label = "Starts In";
+    } else if (now < end) {
+      difference = end - now;
+      label = "Ends In";
+    } else {
+      difference = 0;
+      label = "Ended";
+    }
+
     let timeLeft = {};
-
     if (difference > 0) {
       timeLeft = {
         h: Math.floor(difference / (1000 * 60 * 60)),
@@ -33,33 +48,33 @@ const CountdownTimer = ({ endTime }) => {
     } else {
       timeLeft = { h: 0, m: 0, s: 0 };
     }
-    return timeLeft;
-  }
+    return { timeLeft, label };
+  };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [endTime]);
+  const { timeLeft, label } = calculateTimeLeft();
 
   return (
-    <div className="flex gap-1.5 sm:gap-2">
-      {["h", "m", "s"].map((unit) => (
-        <div key={unit} className="flex flex-col items-center">
-          <div className="bg-slate-900 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-base sm:text-lg shadow-lg shadow-indigo-500/10">
-            {String(timeLeft[unit] || 0).padStart(2, "0")}
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+        {label}
+      </span>
+      <div className="flex gap-1.5 sm:gap-2">
+        {["h", "m", "s"].map((unit) => (
+          <div key={unit} className="flex flex-col items-center">
+            <div className="bg-slate-900 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-base sm:text-lg shadow-lg shadow-indigo-500/10">
+              {String(timeLeft[unit] || 0).padStart(2, "0")}
+            </div>
+            <span className="text-[9px] uppercase font-bold text-slate-400 mt-1">
+              {unit === "h" ? "Hrs" : unit === "m" ? "Min" : "Sec"}
+            </span>
           </div>
-          <span className="text-[9px] uppercase font-bold text-slate-400 mt-1">
-            {unit === "h" ? "Hrs" : unit === "m" ? "Min" : "Sec"}
-          </span>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
 
-const FlashSaleCard = ({ sale }) => {
+const FlashSaleCard = ({ sale, onRefresh, currentTime }) => {
   const dispatch = useDispatch();
   const {
     product,
@@ -67,6 +82,7 @@ const FlashSaleCard = ({ sale }) => {
     variantDetail,
     originalPrice,
     discountedPrice,
+    startTime,
     endTime,
     discountPercent,
     unitsSold,
@@ -74,6 +90,21 @@ const FlashSaleCard = ({ sale }) => {
     status,
     description,
   } = sale;
+
+  const now = +currentTime;
+  const start = +new Date(startTime);
+  const end = +new Date(endTime);
+
+  // Live status derivation for instant UI response
+  const isLiveActive =
+    (status === "ACTIVE" || (status === "SCHEDULED" && now >= start)) &&
+    now < end;
+  const isLiveScheduled = status === "SCHEDULED" && now < start;
+  const isLiveEnded = status === "ENDED" || now >= end;
+
+  const isActive = isLiveActive;
+  const isScheduled = isLiveScheduled;
+  const isSoldOut = unitsSold >= maxUnits;
 
   const activeVariant =
     variantDetail || (variant && typeof variant === "object" ? variant : null);
@@ -107,9 +138,6 @@ const FlashSaleCard = ({ sale }) => {
   };
 
   const progress = Math.min((unitsSold / maxUnits) * 100, 100);
-  const isSoldOut = unitsSold >= maxUnits;
-  const isScheduled = status === "SCHEDULED";
-  const isActive = status === "ACTIVE";
 
   return (
     <div className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 hover:border-indigo-200 transition-all duration-500 group hover:shadow-2xl hover:shadow-indigo-500/5 flex flex-col h-full">
@@ -120,7 +148,6 @@ const FlashSaleCard = ({ sale }) => {
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
 
-        {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="bg-rose-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-black flex items-center gap-1.5 shadow-xl shadow-rose-600/20">
             <Zap className="w-3.5 h-3.5 fill-current" />
@@ -134,8 +161,12 @@ const FlashSaleCard = ({ sale }) => {
           )}
         </div>
 
-        <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md p-2 rounded-2xl border border-white/20 shadow-2xl">
-          <CountdownTimer endTime={endTime} />
+        <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-white shadow-2xl">
+          <CountdownTimer
+            startTime={startTime}
+            endTime={endTime}
+            currentTime={currentTime}
+          />
         </div>
       </div>
 
@@ -247,6 +278,8 @@ const FlashSaleCard = ({ sale }) => {
               <>Sold Out</>
             ) : isScheduled ? (
               <>Starts Soon</>
+            ) : isLiveEnded ? (
+              <>Ended</>
             ) : (
               <>
                 <ShoppingCart className="w-4 h-4" />
@@ -264,22 +297,94 @@ const FlashSales = () => {
   const [flashSales, setFlashSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [prevStatusMap, setPrevStatusMap] = useState({});
 
-  useEffect(() => {
-    const fetchFlashSales = async () => {
-      try {
-        const res = await apiRequest.get("/flash-sales");
-        setFlashSales(res.data.data || []);
-      } catch (err) {
+  const { currentUser } = useSelector((state) => state.users);
+
+  const fetchFlashSales = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    try {
+      const res = await apiRequest.get("/flash-sales");
+      setFlashSales(res.data.data || []);
+    } catch (err) {
+      if (!isSilent) {
         setError(
           err.response?.data?.message || "Unable to fetch deals at the moment.",
         );
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchFlashSales();
+    } finally {
+      if (!isSilent) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    let statusChanged = false;
+    flashSales.forEach((sale) => {
+      const prev = prevStatusMap[sale._id];
+      if (prev && prev !== sale.status) {
+        statusChanged = true;
+        if (sale.status === "ACTIVE") {
+          toast.success(`Deal Live: ${sale.product?.name} is now ACTIVE!`, {
+            icon: <Zap className="w-5 h-5 text-amber-400 fill-amber-400" />,
+            position: "top-center",
+            autoClose: 5000,
+          });
+        } else if (sale.status === "ENDED") {
+          toast.info(`Deal Ended: ${sale.product?.name} has concluded.`, {
+            position: "top-center",
+            autoClose: 3000,
+          });
+        }
+      }
+    });
+
+    if (statusChanged || Object.keys(prevStatusMap).length === 0) {
+      const newMap = {};
+      flashSales.forEach((s) => (newMap[s._id] = s.status));
+      setPrevStatusMap(newMap);
+    }
+  }, [flashSales, prevStatusMap]);
+
+  useEffect(() => {
+    const now = +currentTime;
+    let needsSync = false;
+
+    flashSales.forEach((sale) => {
+      const start = +new Date(sale.startTime);
+      const end = +new Date(sale.endTime);
+
+      if (sale.status === "SCHEDULED" && now >= start) needsSync = true;
+      if (sale.status === "ACTIVE" && now >= end) needsSync = true;
+    });
+
+    if (needsSync) {
+      fetchFlashSales(true);
+    }
+  }, [currentTime, flashSales]);
+
+  useEffect(() => {
+    if (currentUser?._id) {
+      connectSocket(currentUser._id);
+    }
+
+    fetchFlashSales();
+
+    socket.on("FLASH_SALE_STATUS_UPDATED", () => {
+      fetchFlashSales(true);
+    });
+
+    return () => {
+      socket.off("FLASH_SALE_STATUS_UPDATED");
+    };
+  }, [currentUser]);
 
   if (loading) {
     return (
@@ -337,7 +442,12 @@ const FlashSales = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-10">
             {flashSales.map((sale) => (
-              <FlashSaleCard key={sale._id} sale={sale} />
+              <FlashSaleCard
+                key={sale._id}
+                sale={sale}
+                onRefresh={() => fetchFlashSales(true)}
+                currentTime={currentTime}
+              />
             ))}
           </div>
         )}
