@@ -1,5 +1,6 @@
 import flashSaleModel from "../models/flashSale.model.js";
 import productModel from "../models/product.mode.js";
+import userModel from "../models/users.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -129,8 +130,12 @@ export const getFlashSales = asyncHandler(async (req, res) => {
       if (variantDetail) {
         saleObj.variantDetail = {
           ...variantDetail,
-          // Adding type and value as convenience fields for frontend
-          type: variantDetail.color ? "Color" : variantDetail.size ? "Size" : "Variant",
+
+          type: variantDetail.color
+            ? "Color"
+            : variantDetail.size
+              ? "Size"
+              : "Variant",
           value: variantDetail.color || variantDetail.size || "Selected",
         };
       } else {
@@ -167,20 +172,27 @@ export const joinQueue = asyncHandler(async (req, res) => {
   }
 
   const alreadyJoined = sale.participants.some(
-    (p) => p.user.toString() === userId.toString()
+    (p) => p.user.toString() === userId.toString(),
   );
   if (alreadyJoined) {
     throw new ApiError(400, "You are already in the waiting list");
   }
 
   if (sale.participants.length >= sale.waitingRoomCapacity) {
-    throw new ApiError(400, "waitingRoomCapacity is full you can't join the flash sales");
+    throw new ApiError(
+      400,
+      "waitingRoomCapacity is full you can't join the flash sales",
+    );
   }
 
   const queuePosition = sale.participants.length + 1;
 
   sale.participants.push({ user: userId, queuePosition });
   await sale.save();
+
+  await userModel.findByIdAndUpdate(userId, {
+    $addToSet: { joinedFlashSales: saleId },
+  });
 
   return res
     .status(200)
@@ -190,12 +202,20 @@ export const joinQueue = asyncHandler(async (req, res) => {
 export const getFlashSaleParticipants = asyncHandler(async (req, res) => {
   const { saleId } = req.params;
 
-  const sale = await flashSaleModel.findById(saleId).populate("participants.user", "name email");
+  const sale = await flashSaleModel
+    .findById(saleId)
+    .populate("participants.user", "name email");
   if (!sale) {
     throw new ApiError(404, "Flash sale not found");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, sale.participants, "Participants retrieved successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        sale.participants,
+        "Participants retrieved successfully",
+      ),
+    );
 });
