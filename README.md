@@ -1,22 +1,22 @@
 # E-Commerce Flash Sale Engine with Inventory & Rate Limiting
 
 ## Backend Installation
-# install dependencies
+### install dependencies
 ```
 npm i
 ```
-# server start
+### server start
 ```
 npm run dev
 ```
 
 
 ## Frontend Installation
-# install dependencies
+### install dependencies
 ```
 npm i
 ```
-# server start
+### server start
 ```
 npm run dev
 ```
