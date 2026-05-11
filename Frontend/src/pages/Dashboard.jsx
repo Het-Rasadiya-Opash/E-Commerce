@@ -43,6 +43,29 @@ const Dashboard = () => {
     setLoading(false);
   };
 
+  const [expandedSaleId, setExpandedSaleId] = useState(null);
+  const [participants, setParticipants] = useState({});
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
+
+  const fetchParticipants = async (saleId) => {
+    if (participants[saleId]) {
+      setExpandedSaleId(expandedSaleId === saleId ? null : saleId);
+      return;
+    }
+    
+    setLoadingParticipants(true);
+    try {
+      const response = await apiRequest.get(`/flash-sales/${saleId}/participants`);
+      setParticipants({ ...participants, [saleId]: response.data.data });
+      setExpandedSaleId(saleId);
+    } catch (error) {
+      console.error("Error fetching participants:", error);
+      toast.error("Failed to load waitlist");
+    } finally {
+      setLoadingParticipants(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -329,89 +352,142 @@ const Dashboard = () => {
                 <th className="px-6 py-4">Pricing</th>
                 <th className="px-6 py-4">Timing</th>
                 <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {flashSales.length > 0 ? (
                 flashSales.map((sale) => (
-                  <tr
-                    key={sale._id}
-                    className="hover:bg-gray-50/50 transition-colors duration-150 group"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">
-                        {sale.title}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5 truncate max-w-[200px]">
-                        {sale.description}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
-                          {sale.product?.images?.[0] ? (
-                            <img
-                              src={sale.product.images[0]}
-                              alt={sale.product.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center text-gray-400">
-                              <Package className="w-4 h-4" />
-                            </div>
-                          )}
+                  <React.Fragment key={sale._id}>
+                    <tr
+                      className="hover:bg-gray-50/50 transition-colors duration-150 group"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-bold text-gray-900">
+                          {sale.title}
                         </div>
-                        <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">
-                            {sale.product?.name}
+                        <div className="text-xs text-gray-500 mt-0.5 truncate max-w-[200px]">
+                          {sale.description}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
+                            {sale.product?.images?.[0] ? (
+                              <img
+                                src={sale.product.images[0]}
+                                alt={sale.product.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-gray-400">
+                                <Package className="w-4 h-4" />
+                              </div>
+                            )}
                           </div>
-                          {sale.variantDetail && (
-                            <div className="text-xs text-gray-500">
-                              {sale.variantDetail.color &&
-                                `Color: ${sale.variantDetail.color}`}
-                              {sale.variantDetail.color &&
-                                sale.variantDetail.size &&
-                                " | "}
-                              {sale.variantDetail.size &&
-                                `Size: ${sale.variantDetail.size}`}
-                              {!sale.variantDetail.color &&
-                                !sale.variantDetail.size &&
-                                "Variant Selected"}
+                          <div className="ml-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {sale.product?.name}
                             </div>
-                          )}
+                            {sale.variantDetail && (
+                              <div className="text-xs text-gray-500">
+                                {sale.variantDetail.color &&
+                                  `Color: ${sale.variantDetail.color}`}
+                                {sale.variantDetail.color &&
+                                  sale.variantDetail.size &&
+                                  " | "}
+                                {sale.variantDetail.size &&
+                                  `Size: ${sale.variantDetail.size}`}
+                                {!sale.variantDetail.color &&
+                                  !sale.variantDetail.size &&
+                                  "Variant Selected"}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-indigo-600">
-                        ₹{sale.discountedPrice.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-400 line-through">
-                        ₹{sale.originalPrice.toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-xs font-medium text-gray-900">
-                        Starts: {formatDate(sale.startTime)}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5">
-                        Ends: {formatDate(sale.endTime)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                          sale.status === "ACTIVE"
-                            ? "bg-green-50 text-green-700 border-green-100"
-                            : sale.status === "SCHEDULED"
-                              ? "bg-blue-50 text-blue-700 border-blue-100"
-                              : "bg-gray-50 text-gray-700 border-gray-100"
-                        }`}
-                      >
-                        {sale.status}
-                      </span>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-bold text-indigo-600">
+                          ₹{sale.discountedPrice.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-400 line-through">
+                          ₹{sale.originalPrice.toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs font-medium text-gray-900">
+                          Starts: {formatDate(sale.startTime)}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          Ends: {formatDate(sale.endTime)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                            sale.status === "ACTIVE"
+                              ? "bg-green-50 text-green-700 border-green-100"
+                              : sale.status === "SCHEDULED"
+                                ? "bg-blue-50 text-blue-700 border-blue-100"
+                                : "bg-gray-50 text-gray-700 border-gray-100"
+                          }`}
+                        >
+                          {sale.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button
+                          onClick={() => fetchParticipants(sale._id)}
+                          className="text-indigo-600 hover:text-indigo-900 font-bold text-xs uppercase tracking-wider"
+                        >
+                          {expandedSaleId === sale._id ? "Hide List" : "View List"}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedSaleId === sale._id && (
+                      <tr className="bg-gray-50/50">
+                        <td colSpan="6" className="px-6 py-4">
+                          <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                            <h4 className="text-sm font-bold text-gray-900 mb-3">Waitlist Customers</h4>
+                            {loadingParticipants ? (
+                              <div className="text-xs text-gray-500 animate-pulse">Loading participants...</div>
+                            ) : participants[sale._id]?.length > 0 ? (
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs">
+                                  <thead>
+                                    <tr className="text-gray-500 uppercase tracking-wider text-[10px] font-bold">
+                                      <th className="pb-2">User</th>
+                                      <th className="pb-2">Email</th>
+                                      <th className="pb-2">Position</th>
+                                      <th className="pb-2">Status</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-gray-100">
+                                    {participants[sale._id].map((p, idx) => (
+                                      <tr key={p.user?._id || idx} className="text-gray-700">
+                                        <td className="py-2 font-medium">{p.user?.name || "Unknown"}</td>
+                                        <td className="py-2 text-gray-500">{p.user?.email || "No Email"}</td>
+                                        <td className="py-2">{p.queuePosition}</td>
+                                        <td className="py-2">
+                                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                            p.hasOrdered ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
+                                          }`}>
+                                            {p.hasOrdered ? "Ordered" : "Waiting"}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-500">No customers in waitlist</div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               ) : (
                 <tr>

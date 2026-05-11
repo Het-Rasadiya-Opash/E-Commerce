@@ -182,3 +182,16 @@ export const joinQueue = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, sale, "Joined waiting list successfully"));
 });
+
+export const getFlashSaleParticipants = asyncHandler(async (req, res) => {
+  const { saleId } = req.params;
+
+  const sale = await flashSaleModel.findById(saleId).populate("participants.user", "name email");
+  if (!sale) {
+    throw new ApiError(404, "Flash sale not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, sale.participants, "Participants retrieved successfully"));
+});
