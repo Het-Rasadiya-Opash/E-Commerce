@@ -173,6 +173,10 @@ export const joinQueue = asyncHandler(async (req, res) => {
     throw new ApiError(400, "You are already in the waiting list");
   }
 
+  if (sale.participants.length >= sale.waitingRoomCapacity) {
+    throw new ApiError(400, "waitingRoomCapacity is full you can't join the flash sales");
+  }
+
   const queuePosition = sale.participants.length + 1;
 
   sale.participants.push({ user: userId, queuePosition });
