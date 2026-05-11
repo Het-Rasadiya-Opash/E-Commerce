@@ -66,7 +66,7 @@ export const createFlashSale = asyncHandler(async (req, res) => {
     title,
     description,
     product,
-    variant,
+    variant: variant || null,
     originalPrice,
     discountedPrice,
     startTime: new Date(startTime),

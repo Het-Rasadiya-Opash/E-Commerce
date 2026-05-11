@@ -73,7 +73,11 @@ const CreateFlashSale = () => {
     }
 
     try {
-      const response = await apiRequest.post("/flash-sales/create", formData);
+      const submissionData = { ...formData };
+      if (!submissionData.variant) {
+        submissionData.variant = null;
+      }
+      const response = await apiRequest.post("/flash-sales/create", submissionData);
       toast.success(
         response.data.message || "Flash sale created successfully!",
       );

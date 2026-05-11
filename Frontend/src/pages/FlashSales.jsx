@@ -363,11 +363,9 @@ const FlashSales = () => {
   }, []);
 
   useEffect(() => {
-    let statusChanged = false;
     flashSales.forEach((sale) => {
       const prev = prevStatusMap[sale._id];
       if (prev && prev !== sale.status) {
-        statusChanged = true;
         if (sale.status === "ACTIVE") {
           toast.success(`Deal Live: ${sale.product?.name} is now ACTIVE!`, {
             icon: <Zap className="w-5 h-5 text-amber-400 fill-amber-400" />,
@@ -383,9 +381,14 @@ const FlashSales = () => {
       }
     });
 
-    if (statusChanged || Object.keys(prevStatusMap).length === 0) {
-      const newMap = {};
-      flashSales.forEach((s) => (newMap[s._id] = s.status));
+    const newMap = {};
+    flashSales.forEach((s) => (newMap[s._id] = s.status));
+
+    const isDifferent =
+      Object.keys(newMap).length !== Object.keys(prevStatusMap).length ||
+      Object.keys(newMap).some((key) => newMap[key] !== prevStatusMap[key]);
+
+    if (isDifferent) {
       setPrevStatusMap(newMap);
     }
   }, [flashSales, prevStatusMap]);
