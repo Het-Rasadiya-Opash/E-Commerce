@@ -119,7 +119,7 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime, currentUser }) => {
       toast.success("Joined the waiting list!");
       onRefresh();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to join waitlist");
+      toast.error(err.response?.data?.message || err.response?.data || "Failed to join waitlist");
     }
   };
 
@@ -347,7 +347,7 @@ const FlashSales = () => {
     } catch (err) {
       if (!isSilent) {
         setError(
-          err.response?.data?.message || "Unable to fetch deals at the moment.",
+          err.response?.data?.message || err.response?.data || "Unable to fetch deals at the moment.",
         );
       }
     } finally {

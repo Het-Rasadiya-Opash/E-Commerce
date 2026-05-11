@@ -1,6 +1,7 @@
 import express from "express";
 import { authorizeRole } from "../middlewares/authRole.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { ipLimiter, userLimiter } from "../middlewares/rateLimit.middleware.js";
 import {
   createFlashSale,
   getFlashSales,
@@ -12,7 +13,18 @@ const router = express.Router();
 
 router.post("/create", authMiddleware, authorizeRole("ADMIN"), createFlashSale);
 router.get("/", getFlashSales);
-router.post("/:saleId/join-queue", authMiddleware, joinQueue);
-router.get("/:saleId/participants", authMiddleware, authorizeRole("ADMIN"), getFlashSaleParticipants);
+router.post(
+  "/:saleId/join-queue",
+  ipLimiter,
+  authMiddleware,
+  userLimiter,
+  joinQueue,
+);
+router.get(
+  "/:saleId/participants",
+  authMiddleware,
+  authorizeRole("ADMIN"),
+  getFlashSaleParticipants,
+);
 
 export default router;
