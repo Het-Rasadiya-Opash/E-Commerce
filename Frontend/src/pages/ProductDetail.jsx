@@ -213,7 +213,7 @@ const ProductDetail = () => {
                   {product.basePrice >
                     (selectedVariant?.price || product.basePrice) && (
                     <span className="text-xl text-slate-400 line-through">
-                      ${product.basePrice}
+                      ₹{product.basePrice}
                     </span>
                   )}
                 </div>
@@ -290,9 +290,6 @@ const ProductDetail = () => {
                     <p className="text-sm font-bold text-slate-900">
                       Free Delivery
                     </p>
-                    <p className="text-xs text-slate-500">
-                      On orders over ₹100
-                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -302,9 +299,6 @@ const ProductDetail = () => {
                   <div>
                     <p className="text-sm font-bold text-slate-900">
                       Secure Payment
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      100% Secure Checkout
                     </p>
                   </div>
                 </div>

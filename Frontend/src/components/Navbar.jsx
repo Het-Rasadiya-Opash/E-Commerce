@@ -9,7 +9,7 @@ import {
   User,
   X
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
@@ -21,6 +21,9 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const profileDropdownRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -34,6 +37,40 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Handle clicks outside profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    if (isProfileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isProfileOpen]);
+
+  // Handle clicks outside mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const handleLogout = async () => {
     await apiRequest.post("/users/logout");
@@ -97,7 +134,7 @@ const Navbar = () => {
             </button>
 
             {currentUser ? (
-              <div className="relative">
+              <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center space-x-2 p-1 pl-2 pr-3 hover:bg-slate-100 rounded-full transition-colors border border-slate-200"
@@ -116,63 +153,64 @@ const Navbar = () => {
                 </button>
 
                 {isProfileOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsProfileOpen(false)}
-                    ></div>
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-20 animate-in fade-in zoom-in duration-200">
-                      <div className="px-4 py-2 border-bottom border-slate-50 mb-1">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                          Account
-                        </p>
-                      </div>
-                      {currentUser.role === "ADMIN" ? (
-                        <>
-                          <Link
-                            to="/dashboard"
-                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                          >
-                            <LayoutDashboard className="w-4 h-4" />
-                            <span>Dashboard</span>
-                          </Link>
-                          <Link
-                            to="/orders/admin/all-orders"
-                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                          >
-                            <ListOrdered className="w-4 h-4" />
-
-                            <span>All Orders</span>
-                          </Link>
-                        </>
-                      ) : (
-                        <>
-                          <Link
-                            to="/profile"
-                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                          >
-                            <User className="w-4 h-4" />
-                            <span>My Profile</span>
-                          </Link>
-                          <Link
-                            to="/orders"
-                            className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                          >
-                            <Package className="w-4 h-4" />
-                            <span>Orders</span>
-                          </Link>
-                        </>
-                      )}
-                      <div className="my-1 border-t border-slate-100"></div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-rose-600 hover:bg-rose-50 transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Logout</span>
-                      </button>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-20 animate-in fade-in zoom-in duration-200">
+                    <div className="px-4 py-2 border-bottom border-slate-50 mb-1">
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                        Account
+                      </p>
                     </div>
-                  </>
+                    {currentUser.role === "ADMIN" ? (
+                      <>
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          <span>Dashboard</span>
+                        </Link>
+                        <Link
+                          to="/orders/admin/all-orders"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        >
+                          <ListOrdered className="w-4 h-4" />
+
+                          <span>All Orders</span>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        >
+                          <User className="w-4 h-4" />
+                          <span>My Profile</span>
+                        </Link>
+                        <Link
+                          to="/orders"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        >
+                          <Package className="w-4 h-4" />
+                          <span>Orders</span>
+                        </Link>
+                      </>
+                    )}
+                    <div className="my-1 border-t border-slate-100"></div>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileOpen(false);
+                      }}
+                      className="w-full flex items-center space-x-3 px-4 py-2 text-rose-600 hover:bg-rose-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
                 )}
               </div>
             ) : (
@@ -199,7 +237,7 @@ const Navbar = () => {
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 animate-in slide-in-from-top duration-300">
+        <div ref={mobileMenuRef} className="md:hidden bg-white border-t border-slate-100 animate-in slide-in-from-top duration-300">
           <div className="px-4 pt-2 pb-6 space-y-1">
             <Link
               to="/"

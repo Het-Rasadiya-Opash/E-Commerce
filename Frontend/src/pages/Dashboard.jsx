@@ -52,10 +52,12 @@ const Dashboard = () => {
       setExpandedSaleId(expandedSaleId === saleId ? null : saleId);
       return;
     }
-    
+
     setLoadingParticipants(true);
     try {
-      const response = await apiRequest.get(`/flash-sales/${saleId}/participants`);
+      const response = await apiRequest.get(
+        `/flash-sales/${saleId}/participants`,
+      );
       setParticipants({ ...participants, [saleId]: response.data.data });
       setExpandedSaleId(saleId);
     } catch (error) {
@@ -108,6 +110,7 @@ const Dashboard = () => {
     );
   }
 
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
@@ -124,8 +127,6 @@ const Dashboard = () => {
             <Plus className="w-5 h-5 mr-2" />
             Add New Product
           </Link>
-
-          
         </div>
       </div>
 
@@ -359,9 +360,7 @@ const Dashboard = () => {
               {flashSales.length > 0 ? (
                 flashSales.map((sale) => (
                   <React.Fragment key={sale._id}>
-                    <tr
-                      className="hover:bg-gray-50/50 transition-colors duration-150 group"
-                    >
+                    <tr className="hover:bg-gray-50/50 transition-colors duration-150 group">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-bold text-gray-900">
                           {sale.title}
@@ -440,7 +439,9 @@ const Dashboard = () => {
                           onClick={() => fetchParticipants(sale._id)}
                           className="text-indigo-600 hover:text-indigo-900 font-bold text-xs uppercase tracking-wider"
                         >
-                          {expandedSaleId === sale._id ? "Hide List" : "View List"}
+                          {expandedSaleId === sale._id
+                            ? "Hide List"
+                            : "View List"}
                         </button>
                       </td>
                     </tr>
@@ -448,9 +449,13 @@ const Dashboard = () => {
                       <tr className="bg-gray-50/50">
                         <td colSpan="6" className="px-6 py-4">
                           <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                            <h4 className="text-sm font-bold text-gray-900 mb-3">Waitlist Customers</h4>
+                            <h4 className="text-sm font-bold text-gray-900 mb-3">
+                              Waitlist Customers
+                            </h4>
                             {loadingParticipants ? (
-                              <div className="text-xs text-gray-500 animate-pulse">Loading participants...</div>
+                              <div className="text-xs text-gray-500 animate-pulse">
+                                Loading participants...
+                              </div>
                             ) : participants[sale._id]?.length > 0 ? (
                               <div className="overflow-x-auto">
                                 <table className="w-full text-left text-xs">
@@ -464,15 +469,30 @@ const Dashboard = () => {
                                   </thead>
                                   <tbody className="divide-y divide-gray-100">
                                     {participants[sale._id].map((p, idx) => (
-                                      <tr key={p.user?._id || idx} className="text-gray-700">
-                                        <td className="py-2 font-medium">{p.user?.name || "Unknown"}</td>
-                                        <td className="py-2 text-gray-500">{p.user?.email || "No Email"}</td>
-                                        <td className="py-2">{p.queuePosition}</td>
+                                      <tr
+                                        key={p.user?._id || idx}
+                                        className="text-gray-700"
+                                      >
+                                        <td className="py-2 font-medium">
+                                          {p.user?.email.split('@')[0] || "Unknown"}
+                                        </td>
+                                        <td className="py-2 text-gray-500">
+                                          {p.user?.email || "No Email"}
+                                        </td>
                                         <td className="py-2">
-                                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                            p.hasOrdered ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
-                                          }`}>
-                                            {p.hasOrdered ? "Ordered" : "Waiting"}
+                                          {p.queuePosition}
+                                        </td>
+                                        <td className="py-2">
+                                          <span
+                                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                              p.hasOrdered
+                                                ? "bg-green-50 text-green-700"
+                                                : "bg-yellow-50 text-yellow-700"
+                                            }`}
+                                          >
+                                            {p.hasOrdered
+                                              ? "Ordered"
+                                              : "Waiting"}
                                           </span>
                                         </td>
                                       </tr>
@@ -481,7 +501,9 @@ const Dashboard = () => {
                                 </table>
                               </div>
                             ) : (
-                              <div className="text-xs text-gray-500">No customers in waitlist</div>
+                              <div className="text-xs text-gray-500">
+                                No customers in waitlist
+                              </div>
                             )}
                           </div>
                         </td>
