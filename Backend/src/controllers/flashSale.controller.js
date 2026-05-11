@@ -162,33 +162,29 @@ export const joinQueue = asyncHandler(async (req, res) => {
   const { saleId } = req.params;
   const userId = req.user._id;
 
-  const sale = await flashSaleModel.findById(saleId);
-  if (!sale) {
-    throw new ApiError(404, "Flash sale not found");
-  }
-
-  if (sale.status !== "ACTIVE") {
-    throw new ApiError(400, "Flash sale is not active");
-  }
-
-  const alreadyJoined = sale.participants.some(
-    (p) => p.user.toString() === userId.toString(),
+  const sale = await flashSaleModel.findOneAndUpdate(
+    {
+      _id: saleId,
+      status: "ACTIVE",
+      "participants.user": { $ne: userId },
+      $expr: { $lt: [{ $size: "$participants" }, "$waitingRoomCapacity"] },
+    },
+    { $push: { participants: { user: userId, joinedAt: new Date() } } },
+    { returnDocument: "after" },
   );
-  if (alreadyJoined) {
-    throw new ApiError(400, "You are already in the waiting list");
-  }
 
-  if (sale.participants.length >= sale.waitingRoomCapacity) {
-    throw new ApiError(
-      400,
-      "waitingRoomCapacity is full you can't join the flash sales",
+  if (!sale) {
+    const existing = await flashSaleModel.findById(
+      saleId,
+      "status participants.user waitingRoomCapacity",
     );
+    if (!existing) throw new ApiError(404, "Flash sale not found");
+    if (existing.status !== "ACTIVE")
+      throw new ApiError(400, "Flash sale is not active");
+    if (existing.participants.some((p) => p.user.equals(userId)))
+      throw new ApiError(400, "You are already in the waiting list");
+    throw new ApiError(400, "Waiting room is full");
   }
-
-  const queuePosition = sale.participants.length + 1;
-
-  sale.participants.push({ user: userId, queuePosition });
-  await sale.save();
 
   await userModel.findByIdAndUpdate(userId, {
     $addToSet: { joinedFlashSales: saleId },

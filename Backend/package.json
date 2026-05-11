@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "build": "node --check src/index.js && echo Build passed",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

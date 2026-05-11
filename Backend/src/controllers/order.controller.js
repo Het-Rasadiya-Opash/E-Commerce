@@ -177,30 +177,35 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid order ID");
   }
 
-  const query = { _id: orderId };
-  if (req.user.role !== "ADMIN") {
-    query.user = req.user._id;
-  }
+  const filter = { _id: orderId, status: { $in: ["PLACED", "PAID"] } };
+  if (req.user.role !== "ADMIN") filter.user = req.user._id;
 
-  const order = await orderModel.findOne(query);
+  const order = await orderModel.findOneAndUpdate(
+    filter,
+    {
+      $set: { status: "CANCELLED", cancellationReason: reason || "Cancelled by user" },
+      $push: {
+        statusTimeline: {
+          status: "CANCELLED",
+          note: reason || "Cancelled by user",
+          updatedBy: req.user._id,
+          timestamp: new Date(),
+        },
+      },
+    },
+    { returnDocument: "after" },
+  );
 
   if (!order) {
-    throw new ApiError(404, "Order not found");
-  }
-
-  if (!order.isCancellable) {
+    const existing = await orderModel.findById(orderId, "status user");
+    if (!existing) throw new ApiError(404, "Order not found");
+    if (req.user.role !== "ADMIN" && !existing.user.equals(req.user._id))
+      throw new ApiError(403, "Not authorized");
     throw new ApiError(400, "Order cannot be cancelled at this stage");
   }
 
-  order.advanceStatus("CANCELLED", reason || "Cancelled by user", req.user._id);
-  await order.save();
-
   for (const item of order.items) {
-    await productModel.incrementStock(
-      item.product,
-      item.variant,
-      item.quantity,
-    );
+    await productModel.incrementStock(item.product, item.variant, item.quantity);
   }
 
   emitToUser(order.user, "orderStatusUpdated", order);
@@ -259,45 +264,57 @@ export const updateOrderStatusByAdmin = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid order ID");
   }
 
-  const order = await orderModel.findById(orderId);
-
-  if (!order) {
-    throw new ApiError(404, "Order not found");
-  }
-
   const validStatuses = ["PLACED", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"];
-
   if (!validStatuses.includes(status)) {
     throw new ApiError(400, "Invalid status");
   }
 
-  if (status === "CANCELLED" && order.status !== "CANCELLED") {
-    for (const item of order.items) {
-      await productModel.incrementStock(
-        item.product,
-        item.variant,
-        item.quantity,
-      );
+  const $set = { status };
+  if (status === "PAID") {
+    $set["payment.status"] = "PAID";
+    $set["payment.isPaid"] = true;
+    $set["payment.paidAt"] = new Date();
+  }
+  if (status === "CANCELLED") {
+    $set.cancellationReason = note || "Cancelled by Admin";
+  }
+
+  const prevOrder = await orderModel.findOneAndUpdate(
+    { _id: orderId, status: { $ne: status } },
+    {
+      $set,
+      $push: {
+        statusTimeline: {
+          status,
+          note: note || `Order status updated to ${status} by Admin`,
+          updatedBy: req.user._id,
+          timestamp: new Date(),
+        },
+      },
+    },
+    { returnDocument: "after" },
+  );
+
+  if (!prevOrder) {
+    const existing = await orderModel.findById(orderId);
+    if (!existing) throw new ApiError(404, "Order not found");
+    return res
+      .status(200)
+      .json(new ApiResponse(200, existing, "Order status updated successfully"));
+  }
+
+  if (status === "CANCELLED" && prevOrder.status !== "CANCELLED") {
+    for (const item of prevOrder.items) {
+      await productModel.incrementStock(item.product, item.variant, item.quantity);
     }
   }
 
-  if (status === "PAID" && order.payment.status !== "PAID") {
-    order.payment.status = "PAID";
-    order.payment.isPaid = true;
-    order.payment.paidAt = new Date();
-  }
-
-  order.advanceStatus(
-    status,
-    note || `Order status updated to ${status} by Admin`,
-    req.user._id,
-  );
-
-  await order.save();
-
-  emitToUser(order.user, "orderStatusUpdated", order);
+  const updatedOrder = await orderModel.findById(orderId);
+  emitToUser(prevOrder.user, "orderStatusUpdated", updatedOrder);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, order, "Order status updated successfully"));
+    .json(new ApiResponse(200, updatedOrder, "Order status updated successfully"));
 });
+
+
