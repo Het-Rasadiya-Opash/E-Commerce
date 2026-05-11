@@ -1,11 +1,11 @@
+import mongoose from "mongoose";
+import flashSaleModel from "../models/flashSale.model.js";
+import orderModel from "../models/order.model.js";
+import productModel from "../models/product.mode.js";
+import { emitToUser } from "../socket.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import orderModel from "../models/order.model.js";
-import productModel from "../models/product.mode.js";
-import flashSaleModel from "../models/flashSale.model.js";
-import mongoose from "mongoose";
-import { emitToUser } from "../socket.js";
 
 export const createOrder = asyncHandler(async (req, res) => {
   const {
@@ -18,7 +18,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     shippingFee,
     grandTotal,
     notes,
-    flashSaleId, 
+    flashSaleId,
   } = req.body;
 
   if (!items || items.length === 0) {

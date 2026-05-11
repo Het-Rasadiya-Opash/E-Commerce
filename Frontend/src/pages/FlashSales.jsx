@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from "react";
 import {
-  Zap,
-  Timer,
-  Package,
   AlertCircle,
-  ShoppingCart,
-  Percent,
-  Clock,
-  TrendingDown,
   ChevronRight,
+  Clock,
   Info,
+  Package,
+  ShoppingCart,
+  TrendingDown,
+  Zap
 } from "lucide-react";
-import apiRequest from "../utils/apiRequest";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart, openCart } from "../features/cartSlice";
-import { toast } from "react-toastify";
 import { Link } from "react-router";
-import { socket, connectSocket } from "../utils/socket";
+import { toast } from "react-toastify";
+import { addToCart, openCart } from "../features/cartSlice";
+import apiRequest from "../utils/apiRequest";
+import { connectSocket, socket } from "../utils/socket";
 
 const CountdownTimer = ({ startTime, endTime, currentTime }) => {
   const calculateTimeLeft = () => {
@@ -106,12 +104,13 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime, currentUser }) => {
   const isSoldOut = unitsSold >= maxUnits;
 
   const isUserInWaitlist = sale.participants?.some(
-    (p) => p.user?.toString() === currentUser?._id?.toString()
+    (p) => p.user?.toString() === currentUser?._id?.toString(),
   );
   const userQueuePosition = sale.participants?.find(
-    (p) => p.user?.toString() === currentUser?._id?.toString()
+    (p) => p.user?.toString() === currentUser?._id?.toString(),
   )?.queuePosition;
-  const waitingCount = sale.participants?.filter((p) => !p.hasOrdered).length || 0;
+  const waitingCount =
+    sale.participants?.filter((p) => !p.hasOrdered).length || 0;
 
   const handleJoinWaitlist = async () => {
     try {
@@ -119,7 +118,11 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime, currentUser }) => {
       toast.success("Joined the waiting list!");
       onRefresh();
     } catch (err) {
-      toast.error(err.response?.data?.message || err.response?.data || "Failed to join waitlist");
+      toast.error(
+        err.response?.data?.message ||
+          err.response?.data ||
+          "Failed to join waitlist",
+      );
     }
   };
 
@@ -157,8 +160,8 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime, currentUser }) => {
   const progress = Math.min((unitsSold / maxUnits) * 100, 100);
 
   return (
-    <div className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 hover:border-indigo-200 transition-all duration-500 group hover:shadow-2xl hover:shadow-indigo-500/5 flex flex-col h-full">
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-50">
+    <div className="bg-white rounded-4xl overflow-hidden border border-slate-100 hover:border-indigo-200 transition-all duration-500 group hover:shadow-2xl hover:shadow-indigo-500/5 flex flex-col h-full">
+      <div className="relative aspect-4/3 overflow-hidden bg-slate-50">
         <img
           src={activeVariant?.images?.[0] || product?.images?.[0]}
           alt={product?.name}
@@ -200,7 +203,7 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime, currentUser }) => {
               <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
-          <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed min-h-[40px]">
+          <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed min-h-10">
             {activeVariant
               ? `Premium ${activeVariant.color} edition in ${activeVariant.size} size.`
               : description || product?.description}
@@ -303,8 +306,8 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime, currentUser }) => {
               (isActive && !isSoldOut) || (isSoldOut && !isUserInWaitlist)
                 ? "bg-slate-900 text-white hover:bg-indigo-600 shadow-indigo-600/20"
                 : isSoldOut && isUserInWaitlist
-                ? "bg-emerald-100 text-emerald-600 cursor-not-allowed"
-                : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                  ? "bg-emerald-100 text-emerald-600 cursor-not-allowed"
+                  : "bg-slate-100 text-slate-400 cursor-not-allowed"
             }`}
           >
             {isSoldOut ? (
@@ -347,7 +350,9 @@ const FlashSales = () => {
     } catch (err) {
       if (!isSilent) {
         setError(
-          err.response?.data?.message || err.response?.data || "Unable to fetch deals at the moment.",
+          err.response?.data?.message ||
+            err.response?.data ||
+            "Unable to fetch deals at the moment.",
         );
       }
     } finally {
@@ -468,13 +473,12 @@ const FlashSales = () => {
       <div className="max-w-7xl mx-auto">
         {flashSales.length === 0 ? (
           <div className="text-center py-32 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
-            <div className="w-24 h-24 bg-slate-50 text-slate-300 rounded-[2rem] flex items-center justify-center mx-auto mb-8">
+            <div className="w-24 h-24 bg-slate-50 text-slate-300 rounded-4xl flex items-center justify-center mx-auto mb-8">
               <Package className="w-12 h-12" />
             </div>
             <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">
               No Active Drops
             </h2>
-            
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-10">

@@ -1,32 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import {
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  CreditCard,
+  Eye,
+  Filter,
+  Package,
+  RefreshCcw,
+  Search,
+  Truck,
+  User,
+  X,
+  XCircle
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import {
+  setCurrentOrder,
+  setError,
   setLoading,
   setOrders,
-  setError,
-  setCurrentOrder,
   updateOrder,
 } from "../features/orderSlice";
 import apiRequest from "../utils/apiRequest";
-import {
-  Package,
-  Search,
-  Filter,
-  Eye,
-  MoreVertical,
-  ChevronRight,
-  Calendar,
-  User,
-  CreditCard,
-  Truck,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  RefreshCcw,
-  Edit,
-  X,
-} from "lucide-react";
-import { toast } from "react-toastify";
 
 const AllOrdersShow = () => {
   const { orders, loading, error, currentOrder } = useSelector(

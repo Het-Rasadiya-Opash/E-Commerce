@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
-import apiRequest from "../utils/apiRequest";
-import { toast } from "react-toastify";
 import {
-  Zap,
   Calendar,
-  Tag,
-  Package,
-  Layers,
-  Users,
-  Info,
   ChevronLeft,
+  Info,
   Loader2,
+  Package,
+  Tag,
+  Users,
+  Zap
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+import apiRequest from "../utils/apiRequest";
 
 const CreateFlashSale = () => {
   const navigate = useNavigate();

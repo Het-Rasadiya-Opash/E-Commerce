@@ -1,33 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router";
 import {
-  setLoading,
-  setError,
-  setSuccess,
-  clearError,
-  clearSuccess,
-} from "../features/productSlice";
-import apiRequest from "../utils/apiRequest";
+  ArrowLeft,
+  ChevronRight,
+  Image as ImageIcon,
+  IndianRupee,
+  Layers,
+  Package,
+  Plus,
+  Tag as TagIcon,
+  Trash2,
+  Type,
+  Upload,
+  X
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 import {
-  Plus,
-  Trash2,
-  Upload,
-  Package,
-  Tag as TagIcon,
-  Layers,
-  Image as ImageIcon,
-  CheckCircle2,
-  AlertCircle,
-  X,
-  Type,
-  DollarSign,
-  Briefcase,
-  ChevronRight,
-  IndianRupee,
-  ArrowLeft,
-} from "lucide-react";
+  clearError,
+  clearSuccess,
+  setError,
+  setLoading,
+  setSuccess,
+} from "../features/productSlice";
+import apiRequest from "../utils/apiRequest";
 
 const EditProduct = () => {
   const { productId } = useParams();

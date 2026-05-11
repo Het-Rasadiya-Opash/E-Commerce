@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router";
 import {
-  ShoppingBag,
-  ChevronRight,
-  Package,
-  Tag,
-  ShoppingCart,
-  Layers,
   ArrowRight,
+  ChevronRight,
+  Layers,
+  Package,
+  ShoppingBag,
+  ShoppingCart,
+  Tag,
 } from "lucide-react";
-import apiRequest from "../utils/apiRequest";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { addToCart, openCart } from "../features/cartSlice";
+import { Link } from "react-router";
 import { toast } from "react-toastify";
+import { addToCart, openCart } from "../features/cartSlice";
+import apiRequest from "../utils/apiRequest";
 
 const Categories = () => {
   const dispatch = useDispatch();
@@ -116,7 +116,7 @@ const Categories = () => {
                     key={i}
                     className="bg-white rounded-2xl p-5 border border-slate-100"
                   >
-                    <div className="aspect-[4/5] bg-slate-100 rounded-xl mb-6 animate-pulse" />
+                    <div className="aspect-4/5 bg-slate-100 rounded-xl mb-6 animate-pulse" />
                     <div className="h-5 bg-slate-100 rounded-full w-3/4 mb-3 animate-pulse" />
                     <div className="h-4 bg-slate-100 rounded-full w-1/2 animate-pulse" />
                   </div>
@@ -131,7 +131,7 @@ const Categories = () => {
                     className="group"
                   >
                     <div className="bg-white rounded-2xl p-4 border border-slate-100 hover:border-indigo-100 hover:shadow-2xl transition-all duration-300">
-                      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-50 mb-6">
+                      <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-slate-50 mb-6">
                         {product.images && product.images[0] ? (
                           <img
                             src={product.images[0]}

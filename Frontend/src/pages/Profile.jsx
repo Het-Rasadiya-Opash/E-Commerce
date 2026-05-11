@@ -1,20 +1,14 @@
-import React from "react";
-import { useSelector } from "react-redux";
 import {
-  User,
+  Calendar,
+  ChevronRight,
+  Edit2,
   Mail,
   MapPin,
-  Calendar,
-  Shield,
-  LogOut,
-  Edit2,
   Package,
-  ShieldCheck,
-  Settings,
-  Bell,
-  CreditCard,
-  ChevronRight,
+  Shield,
+  ShieldCheck
 } from "lucide-react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router";
 
 const Profile = () => {

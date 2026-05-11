@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
 import {
-  CheckCircle2,
-  ShoppingBag,
   ArrowRight,
+  CheckCircle2,
   Loader2,
+  ShoppingBag,
   XCircle,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { Link, useSearchParams } from "react-router";
 import { clearCart, verifyPayment } from "../features/cartSlice";
 
 const Success = () => {

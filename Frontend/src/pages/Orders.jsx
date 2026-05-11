@@ -1,33 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import apiRequest from "../utils/apiRequest";
 import {
+  ArrowRight,
+  Calendar,
+  CheckCircle2,
+  ChevronDown,
+  Clock,
+  CreditCard,
+  MapPin,
+  Package,
+  Search,
+  ShoppingBag,
+  Truck,
+  XCircle
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router";
+import { toast } from "react-toastify";
+import {
+  clearOrderError,
+  setError,
   setLoading,
   setOrders,
-  setError,
   updateOrder,
-  clearOrderError,
 } from "../features/orderSlice";
-import {
-  Package,
-  ChevronRight,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Truck,
-  CreditCard,
-  Search,
-  MapPin,
-  AlertCircle,
-  Calendar,
-  ChevronDown,
-  ShoppingBag,
-  ArrowRight,
-  Tag,
-} from "lucide-react";
-import { Link } from "react-router";
-import { socket, connectSocket, disconnectSocket } from "../utils/socket";
-import { toast } from "react-toastify";
+import apiRequest from "../utils/apiRequest";
+import { connectSocket, disconnectSocket, socket } from "../utils/socket";
 
 const StatusBadge = ({ status }) => {
   const statusStyles = {
@@ -93,11 +90,11 @@ const StatusTimeline = ({ timeline = [], currentStatus }) => {
       </div>
 
       <div className="relative px-2">
-        <div className="absolute top-5 left-0 w-full h-[3px] bg-slate-100 rounded-full"></div>
+        <div className="absolute top-5 left-0 w-full h-0.75 bg-slate-100 rounded-full"></div>
 
         {!isCancelled && currentStepIndex !== -1 && (
           <div
-            className="absolute top-5 left-0 h-[3px] bg-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(79,70,229,0.4)]"
+            className="absolute top-5 left-0 h-0.75 bg-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(79,70,229,0.4)]"
             style={{
               width: `${(currentStepIndex / (steps.length - 1)) * 100}%`,
             }}

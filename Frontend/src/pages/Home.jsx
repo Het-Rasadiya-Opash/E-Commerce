@@ -1,24 +1,20 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import {
-  Search,
   Filter,
-  SlidersHorizontal,
-  X,
-  ChevronDown,
   Package,
-  Tag,
-  CreditCard,
+  Search,
   ShoppingBag,
-  ArrowRight,
-  TrendingUp,
   ShoppingCart,
+  SlidersHorizontal,
+  Tag,
+  X
 } from "lucide-react";
-import apiRequest from "../utils/apiRequest";
-import { setProducts, setLoading, setError } from "../features/productSlice";
-import { addToCart, openCart } from "../features/cartSlice";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
 import { toast } from "react-toastify";
+import { addToCart, openCart } from "../features/cartSlice";
+import { setError, setLoading, setProducts } from "../features/productSlice";
+import apiRequest from "../utils/apiRequest";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -201,7 +197,7 @@ const Home = () => {
                     key={i}
                     className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm"
                   >
-                    <div className="aspect-[4/5] bg-slate-100 rounded-xl mb-6" />
+                    <div className="aspect-4/5 bg-slate-100 rounded-xl mb-6" />
                     <div className="h-5 bg-slate-100 rounded-full w-3/4 mb-3" />
                     <div className="h-4 bg-slate-100 rounded-full w-1/2 mb-6" />
                     <div className="flex justify-between items-center">
@@ -257,7 +253,7 @@ const Home = () => {
                 {products.map((product) => (
                   <Link to={`/product/${product._id}`} key={product._id}>
                     <div className="bg-white rounded-2xl p-4 border border-slate-100 hover:border-indigo-100 hover:shadow-lg transition-all">
-                      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-slate-50 mb-6">
+                      <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-slate-50 mb-6">
                         {product.images && product.images[0] ? (
                           <img
                             src={product.images[0]}

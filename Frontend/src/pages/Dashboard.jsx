@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import apiRequest from "../utils/apiRequest";
 import {
-  Package,
-  Plus,
-  Trash2,
   Edit,
   ExternalLink,
+  Package,
+  Plus,
   Search,
+  Trash2,
   Zap,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { toast } from "react-toastify";
+import apiRequest from "../utils/apiRequest";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -183,7 +183,7 @@ const Dashboard = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/50 text-[11px] font-bold text-gray-500 uppercase tracking-[0.1em]">
+              <tr className="bg-gray-50/50 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                 <th className="px-6 py-4">Product Info</th>
                 <th className="px-6 py-4">Category</th>
                 <th className="px-6 py-4">Price</th>
@@ -200,7 +200,7 @@ const Dashboard = () => {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="h-14 w-14 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
+                        <div className="h-14 w-14 shrink-0 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
                           {product.images?.[0] ? (
                             <img
                               src={product.images[0]}
@@ -346,7 +346,7 @@ const Dashboard = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/50 text-[11px] font-bold text-gray-500 uppercase tracking-[0.1em]">
+              <tr className="bg-gray-50/50 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
                 <th className="px-6 py-4">Sale Details</th>
                 <th className="px-6 py-4">Product</th>
                 <th className="px-6 py-4">Pricing</th>
@@ -366,13 +366,13 @@ const Dashboard = () => {
                         <div className="text-sm font-bold text-gray-900">
                           {sale.title}
                         </div>
-                        <div className="text-xs text-gray-500 mt-0.5 truncate max-w-[200px]">
+                        <div className="text-xs text-gray-500 mt-0.5 truncate max-w-50">
                           {sale.description}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
+                          <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
                             {sale.product?.images?.[0] ? (
                               <img
                                 src={sale.product.images[0]}

@@ -1,25 +1,20 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router";
 import {
-  X,
+  ArrowRight,
   Minus,
   Plus,
-  Trash2,
   ShoppingBag,
-  CreditCard,
-  ArrowRight,
   Tag,
+  X
 } from "lucide-react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import {
   addToCart,
-  decreaseCart,
-  removeFromCart,
-  clearCart,
-  getTotals,
   closeCart,
-  checkout,
-  createOrder,
+  decreaseCart,
+  getTotals,
+  removeFromCart
 } from "../features/cartSlice";
 
 const CartDrawer = () => {
@@ -41,11 +36,11 @@ const CartDrawer = () => {
   return (
     <>
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] transition-opacity duration-300"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-60 transition-opacity duration-300"
         onClick={handleClose}
       />
 
-      <div className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-[70] transform transition-transform duration-300 flex flex-col animate-in slide-in-from-right">
+      <div className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-70 transform transition-transform duration-300 flex flex-col animate-in slide-in-from-right">
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-50 p-2 rounded-xl text-indigo-600">

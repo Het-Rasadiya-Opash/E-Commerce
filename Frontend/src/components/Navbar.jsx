@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link } from "react-router";
 import {
-  ShoppingBag,
-  User,
-  Menu,
-  X,
-  LogOut,
-  Settings,
-  Package,
-  Heart,
-  Search,
   ChevronDown,
   LayoutDashboard,
-  Plus,
   ListOrdered,
+  LogOut,
+  Menu,
+  Package,
+  ShoppingBag,
+  User,
+  X
 } from "lucide-react";
-import { logout } from "../features/usersSlice";
-import { toggleCart } from "../features/cartSlice";
-import apiRequest from "../utils/apiRequest";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { toggleCart } from "../features/cartSlice";
+import { logout } from "../features/usersSlice";
+import apiRequest from "../utils/apiRequest";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

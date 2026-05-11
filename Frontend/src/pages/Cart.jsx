@@ -1,31 +1,30 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router";
 import {
   ArrowLeft,
-  Minus,
-  Plus,
-  Trash2,
-  ShoppingBag,
   CreditCard,
-  Tag,
   MapPin,
-  Phone,
-  User,
-  Truck,
   MessageSquare,
+  Minus,
+  Phone,
+  Plus,
+  ShoppingBag,
+  Tag,
+  Trash2,
+  Truck,
+  User,
 } from "lucide-react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import {
   addToCart,
-  decreaseCart,
-  removeFromCart,
-  clearCart,
-  getTotals,
   checkout,
+  clearCart,
   createOrder,
+  decreaseCart,
+  getTotals,
+  removeFromCart,
 } from "../features/cartSlice";
-import { useNavigate } from "react-router";
-import { toast } from "react-toastify";
 
 const Cart = () => {
   const cart = useSelector((state) => state.cart);
@@ -187,7 +186,7 @@ const Cart = () => {
                   key={`${cartItem.product._id}-${cartItem.selectedVariant?._id || "base"}`}
                   className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-6 transition-all hover:border-indigo-100"
                 >
-                  <div className="w-full sm:w-32 aspect-square bg-slate-50 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="w-full sm:w-32 aspect-square bg-slate-50 rounded-xl overflow-hidden shrink-0">
                     {imgUrl ? (
                       <img
                         src={imgUrl}

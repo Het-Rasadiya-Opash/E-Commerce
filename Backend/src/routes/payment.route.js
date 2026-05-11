@@ -1,5 +1,8 @@
 import express from "express";
-import { createPayment, verifySession } from "../controllers/payment.controller.js";
+import {
+  createPayment,
+  verifySession,
+} from "../controllers/payment.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 const router = express.Router();
 

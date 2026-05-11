@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import { useDispatch } from "react-redux";
-import { addToCart, openCart } from "../features/cartSlice";
 import {
-  Star,
-  ShoppingCart,
-  ShieldCheck,
-  Truck,
   ArrowLeft,
+  CheckCircle2,
+  Heart,
   Minus,
   Plus,
-  Heart,
   Share2,
-  CheckCircle2,
+  ShieldCheck,
+  ShoppingCart,
+  Star,
+  Truck,
 } from "lucide-react";
-import apiRequest from "../utils/apiRequest";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
+import { addToCart, openCart } from "../features/cartSlice";
+import apiRequest from "../utils/apiRequest";
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -144,7 +144,7 @@ const ProductDetail = () => {
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(img)}
-                      className={`relative min-w-[80px] h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                      className={`relative min-w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
                         selectedImage === img
                           ? "border-indigo-600 ring-2 ring-indigo-600/20"
                           : "border-transparent opacity-70 hover:opacity-100"
@@ -234,7 +234,7 @@ const ProductDetail = () => {
                         <button
                           key={v._id}
                           onClick={() => handleVariantChange(v)}
-                          className={`px-4 py-3 rounded-xl border-2 transition-all flex flex-col items-start gap-1 min-w-[120px] ${
+                          className={`px-4 py-3 rounded-xl border-2 transition-all flex flex-col items-start gap-1 min-w-30 ${
                             selectedVariant?._id === v._id
                               ? "border-indigo-600 bg-indigo-50/30 ring-2 ring-indigo-600/10"
                               : "border-slate-100 hover:border-slate-300"

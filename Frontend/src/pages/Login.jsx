@@ -1,6 +1,17 @@
+import {
+  AlertCircle,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Lock,
+  LogIn,
+  Mail,
+  ShoppingBag,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import {
   clearError,
   setCurrentUser,
@@ -8,17 +19,6 @@ import {
   setLoading,
 } from "../features/usersSlice";
 import apiRequest from "../utils/apiRequest";
-import { toast } from "react-toastify";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  LogIn,
-  ShoppingBag,
-  ArrowRight,
-  AlertCircle,
-} from "lucide-react";
 
 const Login = () => {
   const [formData, setFormData] = useState({

@@ -1,6 +1,22 @@
-import React, { useEffect, useState } from "react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Globe,
+  Hash,
+  Lock,
+  Mail,
+  MapPin,
+  Navigation,
+  ShoppingBag,
+  User,
+  UserPlus,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
+import { toast } from "react-toastify";
 import {
   clearError,
   setCurrentUser,
@@ -8,22 +24,6 @@ import {
   setLoading,
 } from "../features/usersSlice";
 import apiRequest from "../utils/apiRequest";
-import { toast } from "react-toastify";
-import {
-  User,
-  Mail,
-  Lock,
-  MapPin,
-  Globe,
-  Navigation,
-  Hash,
-  UserPlus,
-  ShoppingBag,
-  ArrowRight,
-  AlertCircle,
-  Eye,
-  EyeOff,
-} from "lucide-react";
 
 const Register = () => {
   const [formData, setFormData] = useState({
