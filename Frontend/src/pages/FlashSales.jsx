@@ -74,7 +74,7 @@ const CountdownTimer = ({ startTime, endTime, currentTime }) => {
   );
 };
 
-const FlashSaleCard = ({ sale, onRefresh, currentTime }) => {
+const FlashSaleCard = ({ sale, onRefresh, currentTime, currentUser }) => {
   const dispatch = useDispatch();
   const {
     product,
@@ -104,6 +104,24 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime }) => {
   const isActive = isLiveActive;
   const isScheduled = isLiveScheduled;
   const isSoldOut = unitsSold >= maxUnits;
+
+  const isUserInWaitlist = sale.participants?.some(
+    (p) => p.user?.toString() === currentUser?._id?.toString()
+  );
+  const userQueuePosition = sale.participants?.find(
+    (p) => p.user?.toString() === currentUser?._id?.toString()
+  )?.queuePosition;
+  const waitingCount = sale.participants?.filter((p) => !p.hasOrdered).length || 0;
+
+  const handleJoinWaitlist = async () => {
+    try {
+      await apiRequest.post(`/flash-sales/${sale._id}/join-queue`);
+      toast.success("Joined the waiting list!");
+      onRefresh();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to join waitlist");
+    }
+  };
 
   const activeVariant =
     variantDetail || (variant && typeof variant === "object" ? variant : null);
@@ -223,6 +241,12 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime }) => {
               style={{ width: `${progress}%` }}
             />
           </div>
+          {sale.participants?.length > 0 && (
+            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-500 mt-2">
+              <span>Waiting List:</span>
+              <span>{waitingCount} people waiting</span>
+            </div>
+          )}
         </div>
 
         {showAllVariants && product?.variants?.length > 0 && (
@@ -265,16 +289,30 @@ const FlashSaleCard = ({ sale, onRefresh, currentTime }) => {
 
         <div className="mt-auto">
           <button
-            disabled={!isActive || isSoldOut}
-            onClick={() => handleAddToCart()}
+            disabled={!isActive && !isSoldOut}
+            onClick={() => {
+              if (isSoldOut) {
+                if (!isUserInWaitlist) {
+                  handleJoinWaitlist();
+                }
+              } else {
+                handleAddToCart();
+              }
+            }}
             className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] flex items-center justify-center gap-3 shadow-xl ${
-              isActive && !isSoldOut
+              (isActive && !isSoldOut) || (isSoldOut && !isUserInWaitlist)
                 ? "bg-slate-900 text-white hover:bg-indigo-600 shadow-indigo-600/20"
+                : isSoldOut && isUserInWaitlist
+                ? "bg-emerald-100 text-emerald-600 cursor-not-allowed"
                 : "bg-slate-100 text-slate-400 cursor-not-allowed"
             }`}
           >
             {isSoldOut ? (
-              <>Sold Out</>
+              isUserInWaitlist ? (
+                <>In Queue (Pos: {userQueuePosition})</>
+              ) : (
+                <>Join Wait List</>
+              )
             ) : isScheduled ? (
               <>Starts Soon</>
             ) : isLiveEnded ? (
@@ -443,6 +481,7 @@ const FlashSales = () => {
                 sale={sale}
                 onRefresh={() => fetchFlashSales(true)}
                 currentTime={currentTime}
+                currentUser={currentUser}
               />
             ))}
           </div>
